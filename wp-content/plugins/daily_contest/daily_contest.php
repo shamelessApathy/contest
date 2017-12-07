@@ -29,6 +29,7 @@ add_shortcode( 'display-contest',$func);
 // Add the admin panel page here
 function admin_page()
 {
+	$entries = getEntries();
 	require_once('shortcode/admin.main.php');
 }
 add_action('admin_menu', 'daily_contest_menu');
@@ -37,7 +38,14 @@ function daily_contest_menu(){
         add_menu_page( 'Daily Contest Plugin Page', 'Daily-Contest Plugin', 'manage_options', 'daily-contest', 'admin_page' );
 }
 
+// Function  to get all DB entries in daily_contest
 
+function getEntries()
+{
+	$entries = require_once('get_entries.php');
+	return $entries;
+	
+}
 
 function createTables()
 {
