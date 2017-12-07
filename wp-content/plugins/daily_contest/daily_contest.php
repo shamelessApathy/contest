@@ -26,10 +26,36 @@ $func = function()
 add_shortcode( 'display-contest',$func);
 
 
+
+
+// Porperly enqueue files for admin area menu
+function load_custom_wp_admin_style($hook) {
+        // Load only on ?page=mypluginname
+        if($hook != 'toplevel_page_mypluginname') {
+                return;
+        }
+        wp_enqueue_style( 'dc-admin-styles', plugins_url('css/dc-admin-styles.css', __FILE__) );
+}
+add_action( 'admin_enqueue_scripts', 'load_custom_wp_admin_style' );
+
+
+
+
+
+
+
+
+
+
+
+
+// End admin area menu
 // Add the admin panel page here
 function admin_page()
 {
 	$entries = getEntries();
+	$path = ABSPATH . 'wp-content/plugins/daily_contest/css/dc-admin-styles.css';
+
 	require_once('shortcode/admin.main.php');
 }
 add_action('admin_menu', 'daily_contest_menu');
