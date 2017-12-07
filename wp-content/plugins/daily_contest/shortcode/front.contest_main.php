@@ -1,3 +1,4 @@
+<div id='contest-form-holder'>
 <h3 style='text-align:center;'>Daily Contest</h3>
 
 <form name='contest-form' id='contest-form' class='contest-form' action='wp-content/plugins/daily_contest/contest_receive.php' method='POST'>
@@ -17,3 +18,4 @@
 	<input class='form-field' type='text' name='zipcode' id='contest-zipcode'/>
 	<button type='button' id='contest-submit'>Submit</button>
 </form>
+</div>

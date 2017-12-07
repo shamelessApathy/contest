@@ -26,6 +26,17 @@ $func = function()
 add_shortcode( 'display-contest',$func);
 
 
+// Add the admin panel page here
+function admin_page()
+{
+	require_once('shortcode/admin.main.php');
+}
+add_action('admin_menu', 'daily_contest_menu');
+ 
+function daily_contest_menu(){
+        add_menu_page( 'Daily Contest Plugin Page', 'Daily-Contest Plugin', 'manage_options', 'daily-contest', 'admin_page' );
+}
+
 
 
 function createTables()
@@ -45,6 +56,7 @@ function createTables()
 		`city` tinytext NOT NULL,
 		`state` tinytext NOT NULL,
 		`zipcode` tinytext NOT NULL,
+		`created_at` int NOT NULL
 		UNIQUE KEY id (id)
 		);";
  

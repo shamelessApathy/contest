@@ -25,12 +25,13 @@ function PDO_injection($email,$first_name,$last_name,$street_address,$city,$stat
 	$username = 'root';
 	$password = 'Poke8112';
 	$dbname = 'contest';
+	$time = time();
 	try {
 		$conn = new PDO("mysql:host=$servername;dbname=$dbname", $username, $password);
 		// set the PDO error mode to exception
 		$conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-		$sql = "INSERT INTO daily_contest (`email`, `first_name`, `last_name`, `street_address`, `city`, `state`, `zipcode`)
-				VALUES (:email, :first_name, :last_name, :street_address, :city, :state, :zipcode)
+		$sql = "INSERT INTO daily_contest (`email`, `first_name`, `last_name`, `street_address`, `city`, `state`, `zipcode`, `created_at`)
+				VALUES (:email, :first_name, :last_name, :street_address, :city, :state, :zipcode, :created_at)
 					";
 		$stmt = $conn->prepare($sql);
 		$stmt->bindParam(":email", $email, PDO::PARAM_STR);
@@ -40,6 +41,7 @@ function PDO_injection($email,$first_name,$last_name,$street_address,$city,$stat
 		$stmt->bindParam(":city", $city, PDO::PARAM_STR);
 		$stmt->bindParam(":state", $state, PDO::PARAM_STR);
 		$stmt->bindParam(":zipcode", $zipcode, PDO::PARAM_STR);
+		$stmt->bindParam(":created_at", $time, PDO::PARAM_INT);
 		if ($stmt->execute())
 		{
 			echo "added an entry!!";

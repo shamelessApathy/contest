@@ -59,10 +59,11 @@ DailyContest.prototype.submitForm = function()
 	           data: serial, // serializes the form's elements.
 	           success: function(data)
 	           {
-	               alert(data); // show response from the php script.
+	               console.log(data); // show response from the php script.
 	           }
 	         });
 	}
+	jQuery('#contest-form-holder').html('<h3>Thank you for entering today!</h3>');
 }
 
 
