@@ -99,7 +99,6 @@ function createTables()
 		`created_at` int NOT NULL
 		UNIQUE KEY id (id)
 		);";
- 
 		require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
 		dbDelta($sql);
 	}
