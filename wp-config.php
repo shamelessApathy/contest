@@ -57,6 +57,10 @@ define('NONCE_SALT',       'put your unique phrase here');
 
 /**#@-*/
 
+
+// Adding Global Var Here
+global $current_entries;
+
 /**
  * WordPress Database Table prefix.
  *

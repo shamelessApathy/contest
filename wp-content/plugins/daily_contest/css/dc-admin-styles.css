@@ -4,3 +4,38 @@
 	height:200px;
 	background-color:green;
 }
+#dc-plugin-logo
+{
+	background-color:black;
+	color:yellow;
+	font-size:20px;
+	padding:5px;
+}
+.list-entry
+{
+	width:100%;
+	height:75px;
+	border:1px solid black;
+	box-sizing:border-box;
+	-o-box-sizing:border-box;
+	-moz-box-sizing:border-box;
+	-webkit-box-sizing:border-box;
+}
+
+
+.dc-entries-table
+{
+	width:100%;
+}
+.dc-entries-table th
+{
+	text-align:left;
+}
+
+#dc-pick-a-winner
+{
+	padding:10px;
+	color:green;
+	background-color:black;
+	margin-top:50px;
+}

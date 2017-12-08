@@ -1,6 +1,13 @@
 <?php
 
 
+// Set seconds in a day
+$day = 84600;
+$time = time();
+$beg = $time - $day;
+$end = $time;
+
+
 		$servername = "localhost";
 		$username = 'root';
 		$password = 'Poke8112';
@@ -18,10 +25,17 @@
 			$stmt = $conn->prepare($sql);
 			$result = $conn->query($sql);
 			$stuff = $result->fetchAll();
-			// Set Global
-			$_SESSION['dc-entries'] = $stuff;
-			return $stuff;
 
+// How many entries are in the array that was returned??
+$count = count($stuff);
 
+// adjust for array indices starting at 0
+$count = $count -1;
 
-?>
+$random = rand(0,$count);
+
+$winner = $stuff[$random];
+
+print_r($winner);
+
+?> 

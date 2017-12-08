@@ -10,7 +10,21 @@
    License: GPL2
    */
 defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
+// Enqueue the styles for admin
+/**
+ * Register and enqueue a custom stylesheet in the WordPress admin.
+ */
+function wpdocs_enqueue_custom_admin_style() {
+        wp_register_style( 'dc-admin-styles', plugins_url('/daily_contest/css/dc-admin-styles.css')); 
+        wp_enqueue_style( 'dc-admin-styles' );
+        wp_register_script('dc-admin-js', plugins_url('/daily_contest/js/dc-admin-js.js'));
+        wp_enqueue_script('dc-admin-js');
+}
+add_action( 'admin_enqueue_scripts', 'wpdocs_enqueue_custom_admin_style' );
 
+
+
+// Enqeue the javascript
 add_action( 'wp_enqueue_scripts', 'register_my_script' );
 
 function register_my_script() 
@@ -28,15 +42,7 @@ add_shortcode( 'display-contest',$func);
 
 
 
-// Porperly enqueue files for admin area menu
-function load_custom_wp_admin_style($hook) {
-        // Load only on ?page=mypluginname
-        if($hook != 'toplevel_page_mypluginname') {
-                return;
-        }
-        wp_enqueue_style( 'dc-admin-styles', plugins_url('css/dc-admin-styles.css', __FILE__) );
-}
-add_action( 'admin_enqueue_scripts', 'load_custom_wp_admin_style' );
+
 
 
 

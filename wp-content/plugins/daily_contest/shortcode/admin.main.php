@@ -1,15 +1,32 @@
 <div class='wrap'>
-	<h1>Something goes here!</h1>
-	<h2>Something else here!</h2>
-	<h3> Even more stuff here!</h3>
-	<h4>This is the smallest isn't it?</h4>
-</div>
-<div id='dc-test'></div>
+<div id='dc-plugin-logo'>Daily Contest Plugin</div>
 
+<h4>These are all the entries from the past 24 hours</h4>
 <div id='dc-entry-container'>
-<?php foreach ($entries as $entry):?>
-	<pre>
-		<?php print_r($entry);?>
-	</pre>
-<?php endforeach;?>
+	<table class='dc-entries-table'>
+		<th>Email</th>
+		<th>First Name</th>
+		<th>Last Name</th>
+		<th>Street Address</th>
+		<th>City</th>
+		<th>State</th>
+		<th>ZipCode</th>
+		<th>Timestamp</th>
+	<?php foreach ($entries as $entry):?>
+		<tr>
+			<td><?php echo $entry['email'];?></td>
+			<td><?php echo $entry['first_name'];?></td>
+			<td><?php echo $entry['last_name'];?></td>
+			<td><?php echo $entry['street_address'];?></td>
+			<td><?php echo $entry['city'];?></td>
+			<td><?php echo $entry['state'];?></td>
+			<td><?php echo $entry['zipcode'];?></td>
+			<td><?php echo $entry['created_at'];?></td>
+		</tr>		
+	<?php endforeach;?>
+	</table>
+</div>
+
+
+<button id='dc-pick-a-winner'><strong>Pick a winner!</strong></button>
 </div>

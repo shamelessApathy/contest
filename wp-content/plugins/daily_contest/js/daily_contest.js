@@ -27,7 +27,7 @@ DailyContest.prototype.validateForm = function()
 }
 
 /**
-*
+* Adds a listener
 *
 *
 */
