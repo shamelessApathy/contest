@@ -55,26 +55,74 @@ DailyContest.prototype.addListener = function(element, action, func)
 }
 
 /**
+* DailyContest.prototype.alreadyVoted
+* gets rid of button to keep voting
+*
+*/
+
+DailyContest.prototype.alreadyVoted = function()
+{
+	console.log('inside alreadyVoted() function');
+	var button = this.dc_daily_contest_button;
+	var parent = button.parentNode;
+	console.log(parent);
+	var alreadyVotedStr = "<div style='width:120px; margin:0 auto; height:120px; background-color:black; color:yellow;'>Come back again tomorrow Thanks for playing!</div>";
+	jQuery(button).remove();
+	jQuery(parent).html(alreadyVotedStr);
+}
+/**
+*
+*
+*
+*
+*/
+DailyContest.prototype.addVote = function(user_id)
+{
+				url = "/wp-content/plugins/daily_contest/contest_receive.php";
+				jQuery.ajax({
+					type:"POST",
+					url: url,
+					data: {'user_id':user_id},
+					success: function(data)
+					{
+						//remove stuff to vote
+						state.alreadyVoted();
+					}
+					});
+}
+
+/**
 *
 * DailyContest.prototype.addDailyEntry
 * Takes user_id and submits it to the daily_contest table
 *
 */
 
-DailyContest.prototype.addDailyEntry = function()
+DailyContest.prototype.addDailyEntry = function(user_id)
 {
 	var user_id = jQuery(state.dc_daily_contest_button).attr('data-user-id');
-	console.log(user_id);
-	url = "/wp-content/plugins/daily_contest/contest_receive.php";
+	// need to test to make sure they haven't already entered
+	var test_url = '/wp-content/plugins/daily_contest/test_if_entered.php';
+	data = {'user_id':user_id};
 	jQuery.ajax({
 		type:"POST",
-		url: url,
-		data: {'user_id':user_id},
-		success: function(data)
+		url: test_url,
+		data: data,
+		success: function(results)
 		{
-			console.log(data);
+			if (results)
+			{
+				state.alreadyVoted();
+			}
+			else
+			{
+				state.addVote(user_id);
+			}
 		}
-	})
+	});
+	/*
+	
+	})*/
 }
 
 /**

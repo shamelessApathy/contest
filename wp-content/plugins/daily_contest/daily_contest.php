@@ -36,11 +36,7 @@ wp_register_style('daily-contest-styles', "/wp-content/plugins/daily_contest/css
 $func = function() 
 {
 	$user_id = get_current_user_id();
-	$entries = require_once('get_entries.php');
-	$time = time();
-	$day = 86400;
-	$beg = $time - $day;
-	$entered_today;
+	$test = require_once('/var/www/contest/wp-content/plugins/daily_contest/test_if_entered.php');
 		require_once('shortcode/front.contest_main.php');
 		wp_enqueue_script( 'daily-contest' );
 		wp_enqueue_style('daily-contest-styles');

@@ -1,5 +1,4 @@
 <?php
-echo "you made it to receiving";
 
 $user_id =  $_POST['user_id'];
 $created_at = time();
@@ -23,7 +22,7 @@ function PDO_injection($user_id, $created_at)
 		$stmt->bindParam(":created_at", $created_at, PDO::PARAM_INT);
 		if ($stmt->execute())
 		{
-			echo "added an entry!!";
+			echo "true";
 		}
 
 		}
@@ -33,7 +32,17 @@ function PDO_injection($user_id, $created_at)
 	    }
 	    $conn = null;
 }
-PDO_injection($user_id, $created_at);
+
+$test_if_entered = require_once('test_if_entered.php');
+
+if (!$test_if_entered)
+{
+	PDO_injection($user_id, $created_at);
+}
+else
+{
+	"echo already voted";
+}
 
 
 ?>
