@@ -81,7 +81,7 @@ function getEntries()
 
 function createTables()
 {
-	global $wpdb;
+	/*global $wpdb;
   	global $your_db_name;
  
 	// create the ECPT metabox database table
@@ -101,10 +101,48 @@ function createTables()
 		);";
 		require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
 		dbDelta($sql);
-	}
+	}*/
+
+
 }
 
 	// run install scripts when plugin is activated
-	register_activation_hook(__FILE__, 'createTables');
+	//register_activation_hook(__FILE__, 'createTables');
+register_activation_hook( __FILE__, 'my_plugin_create_db' );
+
+	function my_plugin_create_db() {
+
+	global $wpdb;
+	$charset_collate = $wpdb->get_charset_collate();
+	$table_name = $wpdb->prefix . 'daily_contest';
+
+	$sql = "CREATE TABLE $table_name (
+		id mediumint(9) NOT NULL AUTO_INCREMENT,
+		created_at int NOT NULL,
+		user_id smallint(5) NOT NULL,
+		UNIQUE KEY id (id)
+	) $charset_collate;";
+
+	require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
+	dbDelta( $sql );
+}
+register_activation_hook(__FILE__, 'my_plugin_create_db2');
+	function my_plugin_create_db2() {
+
+	global $wpdb;
+	$charset_collate = $wpdb->get_charset_collate();
+	$table_name = $wpdb->prefix . 'daily_contest_winners';
+
+	$sql = "CREATE TABLE $table_name (
+		id mediumint(9) NOT NULL AUTO_INCREMENT,
+		created_at int NOT NULL,
+		user_id smallint(5) NOT NULL,
+		UNIQUE KEY id (id)
+	) $charset_collate;";
+
+	require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
+	dbDelta( $sql );
+}
+
 
 ?>
