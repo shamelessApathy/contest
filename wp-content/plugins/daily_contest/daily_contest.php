@@ -30,12 +30,20 @@ add_action( 'wp_enqueue_scripts', 'register_my_script' );
 function register_my_script() 
 {
 wp_register_script( 'daily-contest', plugins_url( '/js/daily_contest.js' , __FILE__ ), array(), '1.0.0', true );
+wp_register_style('daily-contest-styles', "/wp-content/plugins/daily_contest/css/daily-contest-styles.css");
 }
 
 $func = function() 
 {
-	require_once('shortcode/front.contest_main.php');
-	wp_enqueue_script( 'daily-contest' );
+	$user_id = get_current_user_id();
+	$entries = require_once('get_entries.php');
+	$time = time();
+	$day = 86400;
+	$beg = $time - $day;
+	$entered_today;
+		require_once('shortcode/front.contest_main.php');
+		wp_enqueue_script( 'daily-contest' );
+		wp_enqueue_style('daily-contest-styles');
 };
 add_shortcode( 'display-contest',$func);
 

@@ -1,21 +1,20 @@
-<div id='contest-form-holder'>
-<h3 style='text-align:center;'>Daily Contest</h3>
 
-<form name='contest-form' id='contest-form' class='contest-form' action='wp-content/plugins/daily_contest/contest_receive.php' method='POST'>
-	<label>Email</label>
-	<input class='form-field' type='text' name='email' id='contest-email'/>
-	<label>First Name</label>
-	<input class='form-field' type='text' name='first-name' id='contest-first-name'/>
-	<label>Last Name</label>
-	<input class='form-field' type='text' name='last-name' id='contest-last-name'/>
-	<label>Street Address</label>
-	<input class='form-field' type='text' name='street-address' id='contest-street-address'/>
-	<label>City</label>
-	<input class='form-field' type='text' name='city' id='contest-city'/>
-	<label>State</label>
-	<input class='form-field' type='text' name='state' id='contest-state'/>
-	<label>Zip Code</label>
-	<input class='form-field' type='text' name='zipcode' id='contest-zipcode'/>
-	<button type='button' id='contest-submit'>Submit</button>
-</form>
+<?php 
+$logged_in = is_user_logged_in();
+$user_id = get_current_user_id();
+
+?>
+<div id='contest-form-holder'>
+<?php if ($logged_in):?>
+<h3 style='text-align:center;'>Daily Contest</h3>
+<div id='dc-daily-contest-button-holder'>
+<button id='dc-daily-contest-button' data-user-id="<?php echo $user_id;?>">Click to Enter!!</button>
 </div>
+<?php else:?>
+<div id='dc-daily-contest-button-holder'>
+<button id='dc-login-button'>Login to Enter Contest</button>
+</div>
+<?php endif;?>
+</div>
+
+

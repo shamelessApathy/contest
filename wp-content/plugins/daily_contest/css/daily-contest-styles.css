@@ -1,0 +1,16 @@
+#dc-test-div
+{
+	width:100px;
+	height:100px;
+	background-color:yellow;
+}
+#dc-daily-contest-button-holder
+{
+	width:100%;
+	text-align:center;
+}
+#dc-login-form
+{
+	display:none;
+	margin-top:10px;
+}
