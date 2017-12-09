@@ -47,7 +47,11 @@ add_shortcode( 'display-contest',$func);
 
 
 
-
+function getWinners()
+{
+	$winners = require_once('get_winners.php');
+	return $winners;
+}
 
 
 
@@ -64,6 +68,7 @@ add_shortcode( 'display-contest',$func);
 function admin_page()
 {
 	$entries = getEntries();
+	$winners = getWinners();
 	$path = ABSPATH . 'wp-content/plugins/daily_contest/css/dc-admin-styles.css';
 
 	require_once('shortcode/admin.main.php');
@@ -141,6 +146,7 @@ register_activation_hook(__FILE__, 'my_plugin_create_db2');
 		id mediumint(9) NOT NULL AUTO_INCREMENT,
 		created_at int NOT NULL,
 		user_id smallint(5) NOT NULL,
+		shipped smallint(1) NULL,
 		UNIQUE KEY id (id)
 	) $charset_collate;";
 

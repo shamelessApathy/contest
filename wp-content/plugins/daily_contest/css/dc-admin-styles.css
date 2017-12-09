@@ -39,4 +39,9 @@
 	background-color:black;
 	margin-top:50px;
 }
+#dc-winners-table
+{
+	border:2px solid black;
+	background-color:#ccc;
+}
 
