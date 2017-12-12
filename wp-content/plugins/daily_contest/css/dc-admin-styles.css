@@ -37,7 +37,8 @@
 	padding:10px;
 	color:green;
 	background-color:black;
-	margin-top:50px;
+	margin-top:10px;
+	margin-bottom:10px;
 }
 #dc-spacer
 {
@@ -47,8 +48,17 @@
 #dc-winners-table
 {
 	border:2px solid black;
-	background-color:#ccc;
-	height:500px;
+	background-color:#f4d142;
+	height:300px;
+	overflow-y:scroll;
+}
+
+#dc-current-entries
+{
+	background-color:#42ebf4;
+	border:2px solid black;
+	width:100%;
+	height:300px;
 	overflow-y:scroll;
 }
 

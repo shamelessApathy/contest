@@ -9,7 +9,8 @@ var pick_a_winner = function()
 		url: file_url,
 		success: function(results)
 		{
-			console.log(results);
+			console.log(results); 
+			location.reload();
 		}
 	})
 }

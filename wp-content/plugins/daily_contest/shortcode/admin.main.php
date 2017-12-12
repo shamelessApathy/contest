@@ -4,8 +4,9 @@
 
 
 
-
+<div id='dc-current-entries'>
 <h4>These are all the entries from the past 24 hours</h4>
+<button id='dc-pick-a-winner'><strong>Pick a winner!</strong></button>
 <div id='dc-entry-container'>
 	<?php if (isset($entries) && $entries != null):?>
 	<table class='dc-entries-table'>
@@ -36,7 +37,7 @@
 		</tr>		
 	<?php endforeach;?>
 	</table>
-	<button id='dc-pick-a-winner'><strong>Pick a winner!</strong></button>
+</div>
 <?php else:?>
 	<h2 style='color:red;'>Currently there are no contest entrants in the past 24 hours!</h2>
 	<h3><strong>Special Drawing</strong></h3>
