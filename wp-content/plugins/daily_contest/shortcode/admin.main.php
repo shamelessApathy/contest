@@ -1,6 +1,10 @@
 <div class='wrap'>
 <div id='dc-plugin-logo'>Daily Contest Plugin</div>
 
+
+
+
+
 <h4>These are all the entries from the past 24 hours</h4>
 <div id='dc-entry-container'>
 	<?php if (isset($entries) && $entries != null):?>
@@ -34,17 +38,19 @@
 	</table>
 	<button id='dc-pick-a-winner'><strong>Pick a winner!</strong></button>
 <?php else:?>
-	<h3>Currently there are no contest entrants in the past 24 hours!</h3>
-	<h4>Use special draw from entire pool button?</h4>
+	<h2 style='color:red;'>Currently there are no contest entrants in the past 24 hours!</h2>
+	<h3><strong>Special Drawing</strong></h3>
 	<button type='button' id='dc-special-draw-button'>Special Drawing</button>
+	<p>Draws from entire daily_contest database</p>
 <?php endif;?>
 </div>
 
 
-
+<div id="dc-spacer"></div>
 <div id='dc-winners-table'>
 	<h2 style='text-align:center;'>Winners Table</h2>
 	<table class='dc-winners-table'>
+		<th>Delete</th>
 		<th>User Id</th>
 		<th>Email</th>
 		<th>First Name</th>
@@ -70,6 +76,7 @@
 		$shipped = $winner['shipped'];
 		?>
 		<tr>
+			<td><button type='button' data-timestamp="<?php echo $timestamp;?>" data-winner-id="<?php echo $winner['user_id'];?>" class='dc-delete'>Delete</button></td>
 			<td><?php echo $winner['user_id'];?></td>
 			<td><?php echo $email;?></td>
 			<td><?php echo $first_name;?></td>

@@ -10,6 +10,17 @@
    License: GPL2
    */
 defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
+
+
+
+/**  NEED TO DEFINE DATABASE CONSTANTS, $wpdb isn't working correctly   **/
+
+require_once('creds/dc_constants.php');
+
+
+
+
+
 // Enqueue the styles for admin
 /**
  * Register and enqueue a custom stylesheet in the WordPress admin.
