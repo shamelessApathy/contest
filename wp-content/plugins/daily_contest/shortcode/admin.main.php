@@ -2,11 +2,8 @@
 <div id='dc-plugin-logo'>Daily Contest Plugin</div>
 
 
-<?php var_dump($dbuser);?>
 
-<?php echo "<pre>";?>
-<?php print_r($wpdb);?>
-<?php echo "</pre>";?>
+
 
 <div id='dc-current-entries'>
 <h4>These are all the entries from the past 24 hours</h4>

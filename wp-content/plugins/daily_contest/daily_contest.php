@@ -13,14 +13,6 @@ defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 
 
 
-/**  NEED TO DEFINE DATABASE CONSTANTS, $wpdb isn't working correctly   **/
-
-require_once('creds/dc_constants.php');
-
-
-
-
-
 // Enqueue the styles for admin
 /**
  * Register and enqueue a custom stylesheet in the WordPress admin.
@@ -53,21 +45,104 @@ $func = function()
 		wp_enqueue_style('daily-contest-styles');
 };
 add_shortcode( 'display-contest',$func);
-
+ 
 
 
 
 
 function getWinners()
 {
-	$winners = require_once('get_winners.php');
-	return $winners;
+	global $wpdb;
+	$servername = $wpdb->dbhost;
+	$username = $wpdb->dbuser;
+	$password = $wpdb->dbpassword;
+	$dbname = $wpdb->dbname;
+	$conn = new PDO("mysql:host=$servername;dbname=$dbname", $username, $password);
+	// set the PDO error mode to exception
+	$conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+	$sql = "SELECT * FROM wp_daily_contest_winners";
+	$stmt = $conn->prepare($sql);
+	$result = $conn->query($sql);
+	$stuff = $result->fetchAll();
+	// Set Global
+	$_SESSION['dc-winners'] = $stuff;
+
+	return $stuff;
 }
 
 
 
 
 
+function pick_a_winner()
+{
+	global $wpdb;
+	$day = 84600;
+	$time = time();
+	$beg = $time - $day;
+	$end = $time;
+	$servername = $wpdb->dbhost;
+	$username = $wpdb->dbuser;
+	$password = $wpdb->dbpassword;
+	$dbname = $wpdb->dbname;
+	$time = time();
+	$day = 86400;
+	$beginning = $time - $day;
+	$end = $time;
+	$conn = new PDO("mysql:host=$servername;dbname=$dbname", $username, $password);
+	// set the PDO error mode to exception
+	$conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+	$sql = "SELECT * FROM wp_daily_contest
+			WHERE `created_at` >= $beginning AND `created_at` <= $end
+			";
+	$stmt = $conn->prepare($sql);
+	$result = $conn->query($sql);
+	$stuff = $result->fetchAll();
+
+	// How many entries are in the array that was returned??
+	$count = count($stuff);
+
+	// adjust for array indices starting at 0
+	$count = $count -1;
+
+	$random = rand(0,$count);
+
+	$winner = $stuff[$random];
+
+	$winner_id = $winner['user_id'];
+	add_winner($winner_id);
+}
+
+
+function add_winner($user_id) 
+{
+
+	// From here inserting winner into winner's table
+	$winner_user_id = $user_id;
+	$time = time();
+	$servername = $wpdb->dbhost;
+	$username = $wpdb->dbuser;
+	$password = $wpdb->dbpassword;
+	$dbname = $wpdb->dbname;
+
+	// Create connection
+	$conn = new mysqli($servername, $username, $password, $dbname);
+
+	// Check connection
+	if ($conn->connect_error) {
+	    die("Connection failed: " . $conn->connect_error);
+	} 
+	$sql = "INSERT INTO wp_daily_contest_winners (user_id, created_at)
+	VALUES ($winner_user_id, $time)";
+
+	if ($conn->query($sql) === TRUE) {
+		echo $winner_user_id;
+	} else {
+	    echo "Error: " . $sql . "<br>" . $conn->error;
+	}
+
+	$conn->close();
+}
 
 
 
@@ -79,7 +154,6 @@ function getWinners()
 function admin_page()
 {
 	global $wpdb;
-	$dbuser = $wpdb->dbuser;
 	$entries = getEntries();
 	$winners = getWinners();
 
@@ -97,37 +171,31 @@ function daily_contest_menu(){
 
 function getEntries()
 {
-	$entries = require_once('get_entries.php');
-	return $entries;
-	
+	global $wpdb;
+		$servername = $wpdb->dbhost;
+		$username = $wpdb->dbuser;
+		$password = $wpdb->dbpassword;
+		$dbname = $wpdb->dbname;
+		$time = time();
+		$day = 86400;
+		$beginning = $time - $day;
+		$end = $time;
+			$conn = new PDO("mysql:host=$servername;dbname=$dbname", $username, $password);
+			// set the PDO error mode to exception
+			$conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+			$sql = "SELECT * FROM wp_daily_contest
+					WHERE `created_at` >= $beginning AND `created_at` <= $end
+					";
+			$stmt = $conn->prepare($sql);
+			$result = $conn->query($sql);
+			$stuff = $result->fetchAll();
+			// Set Global
+			$_SESSION['dc-entries'] = $stuff;
+
+			return $stuff;	
 }
 
-function createTables()
-{
-	/*global $wpdb;
-  	global $your_db_name;
- 
-	// create the ECPT metabox database table
-	if($wpdb->get_var("show tables like '$your_db_name'") != $your_db_name) 
-	{
-		$sql = "CREATE TABLE daily_contest (
-		`id` mediumint(9) NOT NULL AUTO_INCREMENT,
-		`email` tinytext NOT NULL,
-		`first_name` tinytext NOT NULL,
-		`last_name` tinytext NOT NULL,
-		`street_address` tinytext NOT NULL,
-		`city` tinytext NOT NULL,
-		`state` tinytext NOT NULL,
-		`zipcode` tinytext NOT NULL,
-		`created_at` int NOT NULL
-		UNIQUE KEY id (id)
-		);";
-		require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
-		dbDelta($sql);
-	}*/
 
-
-}
 
 	// run install scripts when plugin is activated
 	//register_activation_hook(__FILE__, 'createTables');
