@@ -78,8 +78,11 @@ function getWinners()
 // Add the admin panel page here
 function admin_page()
 {
+	global $wpdb;
+	$dbuser = $wpdb->dbuser;
 	$entries = getEntries();
 	$winners = getWinners();
+
 	$path = ABSPATH . 'wp-content/plugins/daily_contest/css/dc-admin-styles.css';
 
 	require_once('shortcode/admin.main.php');
