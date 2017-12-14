@@ -53,7 +53,7 @@ add_shortcode( 'display-contest',$func);
 function getWinners()
 {
 	global $wpdb;
-	$servername = $wpdb->dbhost;
+	/*$servername = $wpdb->dbhost;
 	$username = $wpdb->dbuser;
 	$password = $wpdb->dbpassword;
 	$dbname = $wpdb->dbname;
@@ -67,7 +67,9 @@ function getWinners()
 	// Set Global
 	$_SESSION['dc-winners'] = $stuff;
 
-	return $stuff;
+	return $stuff;*/
+	$winners = $wpdb->get_results('SELECT * FROM wp_daily_contest_winners',ARRAY_A);
+	return $winners;
 }
 
 
@@ -147,7 +149,12 @@ function add_winner($user_id)
 
 
 
-
+function get_all_entries()
+{
+	global $wpdb;
+	$allEntries = $wpdb->get_Results('SELECT * FROM wp_daily_contest', ARRAY_A);
+	return $allEntries;
+}
 
 // End admin area menu
 // Add the admin panel page here
@@ -156,6 +163,7 @@ function admin_page()
 	global $wpdb;
 	$entries = getEntries();
 	$winners = getWinners();
+	$allEntries = get_all_entries();
 
 	$path = ABSPATH . 'wp-content/plugins/daily_contest/css/dc-admin-styles.css';
 

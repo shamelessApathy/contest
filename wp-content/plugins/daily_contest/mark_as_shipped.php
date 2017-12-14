@@ -1,8 +1,6 @@
 <?php
-
-$user_id =  $_POST['user_id'];
 $created_at = time();
-
+$user_id = $_POST['user_id'];
 require_once('creds/dc_constants.php');
 
 function PDO_injection($user_id, $created_at)
@@ -16,12 +14,12 @@ function PDO_injection($user_id, $created_at)
 		$conn = new PDO("mysql:host=$servername;dbname=$dbname", $username, $password);
 		// set the PDO error mode to exception
 		$conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-		$sql = "INSERT INTO wp_daily_contest (`user_id`, `created_at`)
-				VALUES (:user_id, :created_at)
+		$sql = "UPDATE wp_daily_contest_winners
+				SET shipped = 1
+				WHERE `user_id` = :user_id
 					";
 		$stmt = $conn->prepare($sql);
 		$stmt->bindParam(":user_id", $user_id, PDO::PARAM_STR);
-		$stmt->bindParam(":created_at", $created_at, PDO::PARAM_INT);
 		if ($stmt->execute())
 		{
 			echo "true";
@@ -35,16 +33,10 @@ function PDO_injection($user_id, $created_at)
 	    $conn = null;
 }
 
-$test_if_entered = require_once('test_if_entered.php');
 
-if (!$test_if_entered)
-{
-	PDO_injection($user_id, $created_at);
-}
-else
-{
-	"echo already voted";
-}
+PDO_injection($user_id, $created_at);
+
+
 
 
 ?>

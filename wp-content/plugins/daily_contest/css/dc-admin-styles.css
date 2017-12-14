@@ -62,3 +62,15 @@
 	overflow-y:scroll;
 }
 
+#dc-all-entries-table
+{
+	height:300px;
+	overflow-y:scroll;
+	width:100%;
+	border:2px solid black;
+	background-color:#ccc;
+}
+.dc-shipped
+{
+	background-color:rgba(0,0,0,0.3);
+}

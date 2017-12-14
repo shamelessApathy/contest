@@ -49,6 +49,28 @@ var delete_entry = function(e)
 		}
 	})
 }
+
+// This marks an item as shipped
+
+var mark_as_shipped = function(e)
+{
+	var target = e.target;
+	var user_id = target.getAttribute('data-id');
+	var data = {'user_id' : user_id};
+	var url = "/wp-content/plugins/daily_contest/mark_as_shipped.php";
+	jQuery.ajax({
+		method:"POST",
+		url:url,
+		data: data,
+		success: function(results)
+		{
+			console.log(results);
+			//location.reload();
+		}
+	})
+}
+
+
 var button = jQuery('#dc-pick-a-winner');
 jQuery(button).on('click', pick_a_winner);
 
@@ -65,4 +87,13 @@ for  (var i = 0; i < deleteButtons.length; i++)
 	deleteButtons[i].addEventListener('click',  delete_entry);
 }
 
+
+
+var shipButtons = document.getElementsByClassName('mark-as-shipped');
+for (var i = 0; i < shipButtons.length; i++)
+{
+	shipButtons[i].addEventListener('click', mark_as_shipped);
+}
 });
+
+
