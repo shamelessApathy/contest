@@ -235,8 +235,9 @@ register_activation_hook(__FILE__, 'my_plugin_create_db2');
 	$sql = "CREATE TABLE $table_name (
 		id mediumint(9) NOT NULL AUTO_INCREMENT,
 		created_at int NOT NULL,
-		user_id smallint(5) NOT NULL,
+		user_id smallint(5) NOT NULL UNIQUE,
 		shipped smallint(1) NULL,
+		email smallint(1) NULL,
 		UNIQUE KEY id (id)
 	) $charset_collate;";
 
@@ -244,5 +245,17 @@ register_activation_hook(__FILE__, 'my_plugin_create_db2');
 	dbDelta( $sql );
 }
 
+/*add_action( 'phpmailer_init', 'configure_smtp' );
+function configure_smtp( PHPMailer $phpmailer ){
+    $phpmailer->isSMTP(); //switch to smtp
+    $phpmailer->Host = 'mail.mydomain.com';
+    $phpmailer->SMTPAuth = true;
+    $phpmailer->Port = 25;
+    $phpmailer->Username = 'Username Here';
+    $phpmailer->Password = 'myemailpassword';
+    $phpmailer->SMTPSecure = false;
+    $phpmailer->From = 'From Email Here';
+    $phpmailer->FromName='Sender Name';
+}*/
 
 ?>

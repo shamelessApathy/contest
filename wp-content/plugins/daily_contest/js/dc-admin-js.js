@@ -65,10 +65,46 @@ var mark_as_shipped = function(e)
 		success: function(results)
 		{
 			console.log(results);
-			//location.reload();
+			location.reload();
 		}
 	})
 }
+
+var send_email = function(e)
+{
+	var target = e.target;
+	var user_id = target.getAttribute('data-id');
+	var email = target.getAttribute('data-email');
+	var data = {'user_id':user_id, 'email':email};
+	jQuery.ajax({
+	   url: '/wp-content/plugins/daily_contest/send_mail.php',
+	   method: 'POST',
+	   data: data,
+	   success: function(results)
+	   {
+	   	console.log(results);
+	   }
+	});
+}
+
+var make_winner = function(e)
+{
+	var target = e.target;
+	var user_id = target.getAttribute('data-id');
+	var url = "/wp-content/plugins/daily_contest/make_winner.php";
+	jQuery.ajax({
+		method:"POST",
+		url: url,
+		data: {'user_id': user_id},
+		success: function(results)
+		{
+			console.log(results);
+			location.reload();
+		}
+	})
+}
+
+
 
 
 var button = jQuery('#dc-pick-a-winner');
@@ -94,6 +130,19 @@ for (var i = 0; i < shipButtons.length; i++)
 {
 	shipButtons[i].addEventListener('click', mark_as_shipped);
 }
+
+
+
+var sendMailButtons = document.getElementsByClassName('email-winner');
+for (var i = 0; i < sendMailButtons.length; i++)
+{
+	sendMailButtons[i].addEventListener('click', send_email);
+}
+
+var makeWinnerButtons = document.getElementsByClassName('make-a-winner');
+for (var i = 0; i < makeWinnerButtons.length; i++)
+{
+	makeWinnerButtons[i].addEventListener('click', make_winner);
+}
+
 });
-
-

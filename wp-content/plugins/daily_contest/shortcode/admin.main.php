@@ -63,10 +63,10 @@
 		<th>Zipcode</th>
 		<th>Timestamp</th>
 		<th>Shipped?</th>
+		<th>Email</th>
 		<?php foreach ($winners as $winner):?>
 		<?php
 		$user_data = get_userdata($winner['user_id']);
-		$email = $user_data->user_email;
 		$first_name = get_cimyFieldValue($winner['user_id'], 'first_name');
 		$last_name = get_cimyFieldValue($winner['user_id'], 'last_name');
 		$street_address = get_cimyFieldValue($winner['user_id'], 'street_address');
@@ -76,11 +76,12 @@
 		$timestamp = $winner['created_at'];
 		$date = date("F j, Y, g:i a", $timestamp);
 		$shipped = $winner['shipped'];
+		$email = $winner['email'] ?? null;
 		?>
 		<tr class="<?php echo ($shipped === '1') ? 'dc-shipped' : null; ?>">
 			<td><button type='button' data-timestamp="<?php echo $timestamp;?>" data-winner-id="<?php echo $winner['user_id'];?>" class='dc-delete'>Delete</button></td>
 			<td><?php echo $winner['user_id'];?></td>
-			<td><?php echo $email;?></td>
+			<td><?php echo $user_data->user_email; ?></td>
 			<td><?php echo $first_name;?></td>
 			<td><?php echo $last_name;?></td>
 			<td><?php echo $street_address;?></td>
@@ -101,6 +102,17 @@
 				}
 				?>
 			</td>
+			<td><?php 
+			if ($email === '1')
+				{
+					echo "Emailed";
+				}
+				else
+				{
+					$string = "<button class='email-winner' data-id='".$winner['user_id']."' data-email='".$user_data->user_email."' type=button>Email Winner</button>";
+					echo $string;
+				}
+				?></td>
 		</tr>
 		<?php endforeach;?>
 	</table>
