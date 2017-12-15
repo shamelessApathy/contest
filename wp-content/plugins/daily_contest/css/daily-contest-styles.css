@@ -8,9 +8,36 @@
 {
 	width:100%;
 	text-align:center;
+	margin-top:-200px;
+	z-index:5;
 }
 #dc-login-form
 {
 	display:none;
 	margin-top:10px;
+}
+#dc-logo-container
+{
+	width:100%;
+	margin:0 auto;
+	position:relative;
+	text-align:center;
+}
+#dc-logo-container img
+{
+	max-width:100%;
+}
+#contest-form-holder
+{
+	width:100%;
+	margin:0 auto;
+}
+#dc-daily-contest-button, #dc-login-button
+{
+	background-color:#a4d06f;
+}
+.dc-content
+{
+	min-height:700px !important;
+	background-color:black !important;
 }
