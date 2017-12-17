@@ -45,8 +45,6 @@ $func = function()
 		wp_enqueue_style('daily-contest-styles');
 };
 add_shortcode( 'display-contest',$func);
- 
-
 
 
 
@@ -71,6 +69,20 @@ function getWinners()
 	$winners = $wpdb->get_results('SELECT * FROM wp_daily_contest_winners',ARRAY_A);
 	return $winners;
 }
+
+$winners_func = function() 
+{
+
+	$winners = getWinners();
+	require_once('shortcode/front.contest_winners.php');
+};
+add_shortcode( 'display-winners',$winners_func);
+ 
+
+
+
+
+
 
 
 

@@ -45,7 +45,7 @@ var delete_entry = function(e)
 		data: entry_id,
 		success: function(results)
 		{
-			console.log(results);
+			location.reload();
 		}
 	})
 }

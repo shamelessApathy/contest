@@ -37,14 +37,36 @@ function PDO_injection($user_id, $created_at)
 
 $test_if_entered = require_once('test_if_entered.php');
 
+function sendMail() 
+{
+	$require = $_SERVER['DOCUMENT_ROOT'].'/wp-load.php';
+	require($require);
+	$user_data = get_userdata($user_id);
+	$email = $user_data->user_email;
+
+
+
+
+	$to = $email;
+	$subject = "Your bong-a-day giveaway entry has been received";
+	$message = "Make sure you log back on tomorrow at http://girlsgonehigh.com and click the button again to enter!!	";
+	$headers = '';
+	$attachments = array();
+	$happen = wp_mail($to,$subject,$message,$headers,$attachments);
+}
+
 if (!$test_if_entered)
 {
 	PDO_injection($user_id, $created_at);
+	sendMail();
 }
 else
 {
 	"echo already voted";
 }
+
+
+
 
 
 ?>

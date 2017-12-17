@@ -18,7 +18,7 @@ function PDO_injection($user_id, $created_at)
 				VALUES (:user_id, :created_at)";
 		$stmt = $conn->prepare($sql);
 		$stmt->bindParam(":user_id", $user_id, PDO::PARAM_STR);
-		$stmt->bindParam(":created_at", $user_id, PDO::PARAM_INT);
+		$stmt->bindParam(":created_at", $time, PDO::PARAM_INT);
 		if ($stmt->execute())
 		{
 			echo "true";
