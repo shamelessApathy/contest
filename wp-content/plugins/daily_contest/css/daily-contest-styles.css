@@ -1,4 +1,4 @@
-#dc-test-div
+	#dc-test-div	
 {
 	width:100px;
 	height:100px;
@@ -14,11 +14,10 @@
 #dc-login-form
 {
 	display:none;
-	width:300px;
-	height:300px;
+	width:100%;
 	background-color:white;
 	margin:0 auto;
-	margin-top:150px;
+	margin-top:30px;
 	z-index:100;
 	text-align:center;
 }
@@ -26,6 +25,7 @@
 {
 	width:100%;
 	margin:0 auto;
+	height:600px;
 	position:relative;
 	text-align:center;
 }
@@ -46,4 +46,49 @@
 {
 	min-height:700px !important;
 	background-color:black !important;
+}
+.float-left
+{
+	float:left;
+}
+.float-right
+{
+	float:right;
+}
+.clear
+{
+	clear:both;
+	float:none;
+}
+.dc-share-icon
+{
+	height:125px;
+	width:125px;
+	position:relative;
+	z-index:100;
+}
+.dc-share-toolbar
+{
+	width:100%;
+	height:125px;
+	position:relative;
+	z-index:100;
+}
+.dc-tool-right
+{
+	position:absolute;
+	right:0;
+}
+.dc-tool-left
+{
+	position:absolute;
+	left:0;
+}
+
+
+@media screen and (max-width: 700px) {
+    #dc-logo-container
+    {
+    	height:275px;
+    }
 }

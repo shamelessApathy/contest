@@ -28,8 +28,26 @@ $user_id = get_current_user_id();
 </div>
 </div>
 
-<?php endif;?>
+<?php 
+
+endif;?>
+
+
 </div>
+<!-- Potential share site stuff, not working right now just going to do the follow me links -->
+<!--
+<div class='dc-share-toolbar'>
+<div class='dc-share-icon dc-tool-left'>
+<a href="https://www.facebook.com/sharer/sharer.php?u=girlsgonehigh.com"><img alt='FB LOGO' src="/wp-content/uploads/2017/12/share_fb_logo.png"/></a>
+<p style='color:#a4d06f;'>Share on Facebook</p>
+</div>
+<div class='dc-share-icon dc-tool-right	'>
+<a href="https://twitter.com/home?status=http%3A//girlsgonehigh.com"><img alt='TWITTER LOGO' src="/wp-content/uploads/2017/12/share_twitter_logo.png"/></a>
+<p style='color:#a4d06f;'>Share on Twitter</p>
+</div>
+</div>-->	
+</div>
+<h4 style='color:#a4d06f; text-align:center;'>Follow us on social media!</h4>
 
 
 

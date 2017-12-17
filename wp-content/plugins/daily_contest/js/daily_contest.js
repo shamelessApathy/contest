@@ -66,7 +66,7 @@ DailyContest.prototype.alreadyVoted = function()
 	var button = this.dc_daily_contest_button;
 	var parent = button.parentNode;
 	console.log(parent);
-	var alreadyVotedStr = "<div style='width:120px; margin:0 auto; height:120px; background-color:black; color:yellow;'>Come back again tomorrow Thanks for playing!</div>";
+	var alreadyVotedStr = "<div style='color='#a4d06f;font-size:30px;'>Come back again tomorrow Thanks for playing!</div>";
 	jQuery(button).remove();
 	jQuery(parent).html(alreadyVotedStr);
 }
