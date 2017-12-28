@@ -62,6 +62,7 @@
 		<th>State</th>
 		<th>Zipcode</th>
 		<th>Timestamp</th>
+		<th>Prize</th>
 		<th>Shipped?</th>
 		<th>Email</th>
 		<?php foreach ($winners as $winner):?>
@@ -77,6 +78,7 @@
 		$date = date("F j, Y, g:i a", $timestamp);
 		$shipped = $winner['shipped'];
 		$email = $winner['email'] ?? null;
+		$prize = $winner['prize'] ?? "";
 		?>
 		<tr class="<?php echo ($shipped === '1') ? 'dc-shipped' : null; ?>">
 			<td><button type='button' data-timestamp="<?php echo $timestamp;?>" data-winner-id="<?php echo $winner['user_id'];?>" class='dc-delete'>Delete</button></td>
@@ -89,6 +91,7 @@
 			<td><?php echo $state;?></td>
 			<td><?php echo $zipcode;?></td>
 			<td><?php echo $date;?></td>
+			<td><input type='text' id='ggh-prize' placeholder='PRIZE' value="<?php echo $prize;?>" /></td>
 			<td style='padding-left:5px;'>
 				<?php 
 				if ($shipped === '1') 

@@ -69,22 +69,46 @@ var mark_as_shipped = function(e)
 		}
 	})
 }
-
+var add_prize_to_winner = function(user_id, prize)
+{
+	var url='/wp-content/plugins/daily_contest/add_prize_to_winner.php';
+	var data = {"user_id":user_id, "prize":prize};
+	jQuery.ajax({
+		method:"POST",
+		url:url,
+		data:data,
+		success: function(results){
+			console.log(results);
+		}
+	});
+}
 var send_email = function(e)
 {
 	var target = e.target;
+	var prize = jQuery(target).parent().siblings().find('#ggh-prize').val();
 	var user_id = target.getAttribute('data-id');
 	var email = target.getAttribute('data-email');
-	var data = {'user_id':user_id, 'email':email};
-	jQuery.ajax({
-	   url: '/wp-content/plugins/daily_contest/send_mail.php',
-	   method: 'POST',
-	   data: data,
-	   success: function(results)
-	   {
-	   	console.log(results);
-	   }
-	});
+	var data = {'user_id':user_id, 'email':email, 'prize':prize};
+	if (prize && prize != null)
+	{
+		jQuery.ajax({
+		   url: '/wp-content/plugins/daily_contest/send_mail.php',
+		   method: 'POST',
+		   data: data,
+		   success: function(results)
+		   {
+		   	if (results)
+		   	{
+		   		add_prize_to_winner(user_id, prize);
+		   		alert("winner email sent!!! For prize: " + prize);
+		   	}
+		   }
+		});
+	}
+	else
+	{
+		alert("You need to fill in the prize field before sending them their winning email!");
+	}
 }
 
 var make_winner = function(e)

@@ -7,7 +7,7 @@ $user_id = get_current_user_id();
 ?>
 <div id='contest-form-holder'>
 <?php if ($logged_in):?>
-<h3 style='text-align:center; color:#ccc;'>Bong-a-Day Giveaway!</h3>
+<h3 style='text-align:center; color:#ccc;'>Daily Prize Giveaway!</h3>
 <?php if($test):?>
 	<?php echo "<h3>Thanks for playing come back tomorrow!</h3>";?>
 <?php else:?>
