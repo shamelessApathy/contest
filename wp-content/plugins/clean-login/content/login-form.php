@@ -37,6 +37,7 @@
 			?>
 
 			<?php if ( $register_url != '' )
+			$register_url = "/wp-login.php?action=register";
 				echo "<a href='$register_url' class='cleanlogin-form-register-link'>". __( 'Register', 'clean-login' ) ."</a>";
 			?>
 						

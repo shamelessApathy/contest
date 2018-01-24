@@ -158,6 +158,17 @@ genesis_register_sidebar( array(
 	'description' => __( 'This is the bottom section of the homepage.', 'agency' ),
 ) );
 
+// This is being added for custom registration and login logos
+function my_login_logo_one() { 
+?> 
+<style type="text/css"> 
+body.login div#login h1 a {
+background-image: url(/wp-content/uploads/2017/12/ggh_logo_sm.jpg);  //Add your own logo image in this url 
+padding-bottom: 30px; 
+} 
+</style>
+<?php 
+} add_action( 'login_enqueue_scripts', 'my_login_logo_one' );
 
 // Adding this for custom navbar additions for register and login logout
 /*function add_login_logout_register_menu( $items, $args ) {

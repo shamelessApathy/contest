@@ -12,7 +12,7 @@ $prize = $_POST['prize'];
 
 $to = $email;
 $subject = "You won the GirlsGoneHigh prize-a-day giveaway!";
-$message = "This message has been sent to you on behalf of girlsgonehigh.com, your entry into the prize-a-day giveaway has won!!!! Your prize should be shipping out anyday now! You won: $prize";
+$message = "This message has been sent to you on behalf of girlsgonehigh.com, your entry into the prize-a-day giveaway has won!!!! Your prize should be shipping out anyday now! You won: $prize !!!   Do not reply to this email!!!";
 $headers = '';
 $attachments = array();
 $happen = wp_mail($to,$subject,$message,$headers,$attachments);

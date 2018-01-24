@@ -1,4 +1,4 @@
-	#dc-test-div	
+#dc-test-div	
 {
 	width:100px;
 	height:100px;
@@ -15,11 +15,15 @@
 {
 	display:none;
 	width:100%;
-	background-color:white;
+	background-color:black;
 	margin:0 auto;
 	margin-top:30px;
 	z-index:100;
 	text-align:center;
+}
+.cleanlogin-container
+{
+	background-color:white;
 }
 #dc-logo-container
 {

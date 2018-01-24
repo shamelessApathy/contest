@@ -11,7 +11,7 @@ $email = $_POST['email'];
 
 $to = $email;
 $subject = "Your bong-a-day giveaway entry has been received";
-$message = "Make sure you log back on tomorrow at http://girlsgonehigh.com and click the button again to enter!!	";
+$message = "Make sure you log back on tomorrow at http://girlsgonehigh.com and click the button again to enter!! Please don't reply to this email!	";
 $headers = '';
 $attachments = array();
 $happen = wp_mail($to,$subject,$message,$headers,$attachments);
