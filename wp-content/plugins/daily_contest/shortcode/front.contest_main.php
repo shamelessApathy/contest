@@ -12,7 +12,7 @@ $user_id = get_current_user_id();
 	<?php echo "<h3>Thanks for playing come back tomorrow!</h3>";?>
 <?php else:?>
 <div id='dc-logo-container'>
-	<img src="http://girlsgonehigh.com/wp-content/uploads/2017/12/ggh_logo_sm.jpg"/>
+	<img src="http://girlsgonehigher.com/wp-content/uploads/2017/12/ggh_logo_sm.jpg"/>
 	<div id='dc-daily-contest-button-holder'>
 		<button id='dc-daily-contest-button' data-user-id="<?php echo $user_id;?>">Click to Enter!!</button>
 
@@ -22,7 +22,7 @@ $user_id = get_current_user_id();
 <?php endif;?>
 <?php else:?>
 <div id='dc-logo-container'>
-	<img src="http://girlsgonehigh.com/wp-content/uploads/2017/12/ggh_logo_sm.jpg"/>
+	<img src="http://girlsgonehigher.com/wp-content/uploads/2017/12/ggh_logo_sm.jpg"/>
 	<div id='dc-daily-contest-button-holder'>
 <button id='dc-login-button'>Login to Enter Contest</button>
 </div>

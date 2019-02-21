@@ -7,8 +7,8 @@
  *
  * @package Genesis\Archives
  * @author  StudioPress
- * @license GPL-2.0+
- * @link    http://my.studiopress.com/themes/genesis/
+ * @license GPL-2.0-or-later
+ * @link    https://my.studiopress.com/themes/genesis/
  */
 
 add_filter( 'genesis_term_intro_text_output', 'wpautop' );
@@ -52,7 +52,7 @@ function genesis_do_taxonomy_title_description() {
 	$intro_text = apply_filters( 'genesis_term_intro_text_output', $intro_text ? $intro_text : '' );
 
 	/**
-	 * Archive headings output hook.
+	 * Fires at end of doing taxonomy archive title and description.
 	 *
 	 * Allows you to reorganize output of the archive headings.
 	 *
@@ -306,7 +306,7 @@ add_action( 'genesis_archive_title_descriptions', 'genesis_do_archive_headings_h
 function genesis_do_archive_headings_headline( $heading = '', $intro_text = '', $context = '' ) {
 
 	if ( $context && $heading ) {
-		printf( '<h1 %s>%s</h1>', genesis_attr( 'archive-title' ), strip_tags( $heading ) );
+		printf( '<h1 %s>%s</h1>', genesis_attr( 'archive-title' ), wp_strip_all_tags( $heading ) );
 	}
 
 }

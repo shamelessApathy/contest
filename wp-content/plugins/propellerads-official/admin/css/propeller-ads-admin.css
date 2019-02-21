@@ -1,0 +1,24 @@
+.toplevel_page_propeller-ads > .wp-menu-image::before {
+	content: '';
+	display: inline-block;
+	padding: 7px 0;
+	width: 20px;
+	height: 20px;
+	background: url('../img/icon.png') center center no-repeat;
+	background-size: contain;
+}
+
+.propeller-ads .form-table + h2 {
+	margin-top: 1em;
+	padding-top: 2em;
+	border-top: 1px solid #CCC;
+}
+
+.propeller-ads .card-wrapper > .card:not(:first-child) {
+	display: inline-block;
+	margin-right: 20px;
+}
+
+#row_propeller_ads_general_token {
+	display: none;
+}

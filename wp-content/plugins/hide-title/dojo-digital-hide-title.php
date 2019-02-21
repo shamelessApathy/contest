@@ -3,8 +3,8 @@
 Plugin Name: Hide Title
 Plugin URI: http://dojodigital.com
 Description: Allows authors to hide the title tag on single pages and posts via the edit post screen.
-Version: 1.0.4
-Author: Brandon Kraft & Randall Runnels
+Version: 1.0.7
+Author: Dojo Digital
 Author URI: http://dojodigital.com
 */
 
@@ -109,13 +109,10 @@ if ( !class_exists( 'DojoDigitalHideTitle' ) ) {
 
 
 		public function wrap_title( $content ){
-
-			if( $this->is_hidden() && $content == $this->title && $this->afterHead ){
+			if( $this->is_hidden() && strcmp($content, $this->title) && $this->afterHead ){
 				$content = '<span class="' . $this->slug . '">' . $content . '</span>';
 			}
-
 			return $content;
-
 		} // wrap_title()
 
 

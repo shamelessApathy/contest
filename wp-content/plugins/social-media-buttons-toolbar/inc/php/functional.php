@@ -12,40 +12,43 @@ function spacexchimp_p005_tollbar() {
 
     // Read options from database and declare variables
     $options = get_option( SPACEXCHIMP_P005_SETTINGS . '_settings' );
-    $media = !empty( $options['media'] ) ? $options['media'] : array();
+    $selected = !empty( $options['buttons-selected'] ) ? $options['buttons-selected'] : array();
+    $links = !empty( $options['buttons-link'] ) ? $options['buttons-link'] : array();
 
-    // Open link in new tab
-    $new_tab = !empty( $options['new_tab'] ) ? 'target="blank"' : '';
+    // Get the array with all buttons
+    $items = spacexchimp_p005_get_items_all();
 
-    // Enable Tolltips
+    // Generate open window code
+    $new_tab = !empty( $options['new_tab'] ) ? 'target="_blank"' : '';
+
+    // Generate tolltips
     $tooltips = !empty( $options['tooltips'] ) ? 'data-toggle="tooltip"' : '';
 
-    // Add a caption above of buttons
+    // Generate caption
     $caption = !empty( $options['caption'] ) ? esc_textarea( $options['caption'] ) : '';
 
     // Generate buttons
-    $toolbar_arr[] = '<ul class="smbt-social-icons">';
-    if ( !empty( $media ) ) {
-        foreach ( $media as $name ) {
-            $slug = !empty( $name['slug'] ) ? $name['slug'] : '';
-            $label = !empty( $name['label'] ) ? $name['label'] : '';
-            $content = !empty( $name['content'] ) ? $name['content'] : '';
-            if ( !empty( $content ) ) {
-                $icon = SPACEXCHIMP_P005_URL . "inc/img/social-media-icons/$slug.png";
-                $toolbar_arr[] = '<li>
-                                        <a
-                                            href="' . $content . '"
-                                            ' . $tooltips . '
-                                            title="' . $label . '"
-                                            ' . $new_tab . '
-                                        >
-                                            <img
-                                                src="' . $icon . '"
-                                                alt="' . $label . '"
-                                            />
-                                        </a>
-                                    </li>';
-            }
+    $toolbar_arr[] = $caption;
+    $toolbar_arr[] = '<ul class="sxc-follow-buttons">';
+    foreach ( $items as $item ) {
+        $slug = !empty( $item['slug'] ) ? $item['slug'] : '';
+        $label = !empty( $item['label'] ) ? $item['label'] : '';
+        $link = !empty( $links[$slug] ) ? $links[$slug] : '';
+        if ( !empty( $selected[$slug] ) ) {
+            $icon = SPACEXCHIMP_P005_URL . "inc/img/social-media-icons/$slug.png";
+            $toolbar_arr[] = '<li>
+                                    <a
+                                        href="' . $link . '"
+                                        ' . $tooltips . '
+                                        title="' . $label . '"
+                                        ' . $new_tab . '
+                                    >
+                                        <img
+                                            src="' . $icon . '"
+                                            alt="' . $label . '"
+                                        />
+                                    </a>
+                              </li>';
         }
     }
     $toolbar_arr[] = '</ul>';
@@ -65,13 +68,10 @@ function spacexchimp_p005_tollbar() {
     }
 
     if ( count( $toolbar_arr ) > 0 ) {
-        array_unshift( $toolbar_arr, $caption );
         array_push( $toolbar_arr, $js );
     }
 
-    // Return the content of array
     return $toolbar_arr;
-
 }
 
 /**
@@ -105,7 +105,75 @@ function spacexchimp_p005_addContent( $content ) {
         }
     }
 
-    // Returns the content.
     return $content;
 }
 add_action( 'the_content', 'spacexchimp_p005_addContent' );
+
+/**
+ * Callback for getting a list of all buttons
+ * @return array with the merged data of both arrays; '_get_items_media()' and '_get_items_additional()'
+ */
+function spacexchimp_p005_get_items_all() {
+
+    // Get all media options and declare variable
+    $array_1 = spacexchimp_p005_get_items_media();
+    $array_2 = spacexchimp_p005_get_items_additional();
+
+    // Merge two arrays
+    $array = array_merge( $array_1, $array_2 );
+
+    return $array;
+}
+
+/**
+ * Callback for getting a list of media buttons
+ * @return array of pairs "nmae" => "Name"
+ */
+function spacexchimp_p005_get_media_pairs_media() {
+
+    // Read all media options and declare variable
+    $items = spacexchimp_p005_get_items_media();
+
+    // Create an array with buttons name pairs 'name' => 'Name'
+    $array = array();
+    foreach ( $items as $item ) {
+        foreach ( $item as $item_key => $item_value ) {
+            if ( $item_key == 'slug' ) $slug = $item_value;
+            if ( $item_key == 'label' ) $label = $item_value;
+        }
+        $array[$slug] = $label;
+    }
+
+    // Rename some items
+    $array['youtube-gaming'] = ' YouTube G';
+
+    // Sort the media array in ascending order, according to the key name
+    if ( !empty($array) ) ksort($array);
+
+    return $array;
+}
+
+/**
+ * Callback for getting a list of additional media buttons
+ * @return array of pairs "nmae" => "Name"
+ */
+function spacexchimp_p005_get_media_pairs_additional() {
+
+    // Read all media options and declare variable
+    $items = spacexchimp_p005_get_items_additional();
+
+    // Create an array with buttons name pairs 'name' => 'Name'
+    $array = array();
+    foreach ( $items as $item ) {
+        foreach ( $item as $item_key => $item_value ) {
+            if ( $item_key == 'slug' ) $slug = $item_value;
+            if ( $item_key == 'label' ) $label = $item_value;
+        }
+        $array[$slug] = $label;
+    }
+
+    // Rename some items
+    $array['website'] = 'Website';
+
+    return $array;
+}

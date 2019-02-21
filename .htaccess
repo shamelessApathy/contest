@@ -1,3 +1,8 @@
+# https redirect
+#RewriteEngine on
+#RewriteCond %{HTTPS} off [OR] 
+#RewriteCond %{HTTP:X-Forwarded-Proto} !https
+#RewriteRule ^/(.*) https://%{HTTP_HOST}/$1 [NC,R=301,L]
 
 # BEGIN WordPress
 <IfModule mod_rewrite.c>
@@ -10,3 +15,4 @@ RewriteRule . /index.php [L]
 </IfModule>
 
 # END WordPress
+

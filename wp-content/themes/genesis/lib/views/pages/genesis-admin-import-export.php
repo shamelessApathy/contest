@@ -7,8 +7,8 @@
  *
  * @package StudioPress\Genesis
  * @author  StudioPress
- * @license GPL-2.0+
- * @link    http://my.studiopress.com/themes/genesis/
+ * @license GPL-2.0-or-later
+ * @link    https://my.studiopress.com/themes/genesis/
  */
 
 ?>
@@ -57,15 +57,23 @@
 							<?php
 							wp_nonce_field( 'genesis-export', 'genesis-export-nonce' );
 							$this->export_checkboxes();
-							if ( $this->get_export_options() )
-								submit_button( __( 'Download Export File', 'genesis' ), 'primary', 'download' );
+							if ( $this->get_export_options() ) {
+								submit_button(__('Download Export File', 'genesis'), 'primary', 'download');
+							}
 							?>
 						</form>
 
 				</td>
 			</tr>
 
-			<?php do_action( 'genesis_import_export_form' ); ?>
+			<?php
+			/**
+			 * Fires on the import export admin page, before the closing tbody tag.
+			 *
+			 * @since 1.6.0
+			 */
+			do_action( 'genesis_import_export_form' );
+			?>
 
 		</tbody>
 	</table>

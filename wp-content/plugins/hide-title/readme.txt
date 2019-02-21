@@ -7,9 +7,9 @@ Tags: wp, title
 Author URI: http://dojodigital.com/
 Author: Dojo Digital
 Requires at least: 3.2
-Tested up to: 4.2
-Stable tag: 1.0.4
-Version: 1.0.4
+Tested up to: 5.0
+Stable tag: 1.0.7
+Version: 1.0.7
 
 Allows authors to hide the title on single pages and posts via the edit post screen.
 
@@ -27,6 +27,18 @@ This plugin allows the author of a post or page to hide the title and it's conta
 1. This Meta Box will be added to the Edit screen for pages & posts
 
 == Changelog ==
+
+= 1.0.7 =
+* Removed wpupdates and fixed problem with special characters
+
+= 1.0.6 =
+
+* Tested New Update Functions for future releases
+
+= 1.0.5 =
+
+* Fixed Deletion Error
+* Added WP-Updater Support
 
 = 1.0.4 =
 
@@ -84,8 +96,3 @@ As noted in the comments, you'll need to replace the string `.your-selector` wit
 = I don't want to edit my theme files, can't you just add an option page? =
 
 I could, but I'd like to avoid adding Yet Another Options Page if I can. If enough people request it though, I'll go ahead and bite the bullet.
-
-= Who is the author of this plugin anyway? =
-
-This plugin was originally was developed by Randall Runnels of Dojo Digital. In March 2015, the plugin was not compatible with the latest version of WordPress. After finding the problem, Brandon Kraft reached out with a solution, but didn't hear a response. He contacted the Plugins team at WordPress.org with an offer to assume development to bring it up date. The plugins team reached out and either recieved the approval of Randall, did not hear back at all, or the e-mail bounced.
-

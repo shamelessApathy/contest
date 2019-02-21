@@ -1,10 +1,10 @@
 === Clean Login ===
 Contributors: hornero, carazo
 Donate link: http://codection.com
-Tags: form, login, registration, editor, lost password, responsive, wpml, internationalization, languages, role, CAPTCHA, honeypot, shortcode, wordpress, frontend
+Tags: form, login, registration, editor, lost password, responsive, wpml, internationalization, languages, role, CAPTCHA, reCaptcha, honeypot, shortcode, wordpress, frontend
 Requires at least: 3.4
-Tested up to: 4.9
-Stable tag: 1.8.2
+Tested up to: 5.0
+Stable tag: 1.9.8
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -33,7 +33,7 @@ Responsive Frontend Login and Registration plugin. A plugin for displaying login
 
 ### Spam protection
 
-*   Register form protected with CAPTCHA (as an option)
+*   Register form protected with CAPTCHA and  Google reCaptcha (as an option)
 *   Forms are also protected by Honeypot antispam protection
 
 ### Internacionalization
@@ -61,7 +61,7 @@ Please, refer to [Installation section](https://wordpress.org/plugins/clean-logi
 2. Preview user
 3. Editor form
 4. Lost password form
-5. Register form with CAPTCHA
+5. Register form with CAPTCHA and Google reCaptcha
 6. Setting access from the dashboard
 7. Setting page from the dashboard
 8. Settings menu
@@ -72,6 +72,38 @@ Please, refer to [Installation section](https://wordpress.org/plugins/clean-logi
 
 == Changelog ==
 
+= 1.9.8 =
+*   Czech language added. Thanks to Zbyněk Gilar
+*	Tested on WordPress 5.0.1
+
+= 1.9.7 =
+*   Action hook at the end of successful registration added. Thanks to Daniel Schumacher (@favor-it)
+
+= 1.9.6 =
+*   Unregistering captcha session bug solved. Thanks to Joe (@htjoe38)
+
+= 1.9.5 =
+*   New feature: registration process now distinguish between a wrong e-mail and an e-mail that was already registered with a different account. Thanks to Martin Newman.
+*   New feature: a string template parameter is now added to the clean_login_register shortcode. Thanks to Martin Newman.
+*   Session is now not destroyed but resetting the necessary parameter. Thanks to Martin Newman.
+
+= 1.9.4 =
+*   Email notification now support HTML as claimed (Bug solved). Thanks to Adrian Toro (@adrianifero)
+*   Redirect after login is now working again (partially solved, just commented the suggested code). Thanks to Adrian Toro (@adrianifero)
+
+= 1.9.3 =
+*   Timed hiding of notification element. Thanks to Frede Hundewadt
+
+= 1.9.2 =
+*   reCaptcha bug solved, due to PHP version < 5.3
+
+= 1.9.1 =
+*   reCaptcha bug solved, due to PHP version < 5.5
+
+= 1.9 =
+*   Adding the Google reCaptcha option to the plugin. Thanks to Pablo Gómez Margareto (@pablomargareto)
+*   Norwegian and Spanish languages updated. Thanks to Pablo Gómez Margareto (@pablomargareto)
+
 = 1.8.2 =
 *   Password generation bug solved. Thanks to fouad.z (@fouadz)
 *   Tested on 4.9
@@ -80,7 +112,7 @@ Please, refer to [Installation section](https://wordpress.org/plugins/clean-logi
 *   $_POST sanitizing bug solved. Thanks to tomykas (@tomykas)
 
 = 1.8 =
-*   Norwegian language included. Thanks to Pablo Gómez Margareto
+*   Norwegian language included. Thanks to Pablo Gómez Margareto (@pablomargareto)
 *   Security exploits fixed, described below. Thanks to Ipstenu (Mika Epstein)
 *   Sanitize, escape, and validate all POST calls. Bug fixed
 *   Checked using Nonces and permissions. Bug fixed

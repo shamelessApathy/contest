@@ -1,445 +1,891 @@
-<?php
-class CPAdmin {
-  const NONCE = 'cp-admin-settings';
-
-	private static $initiated = false;
-	
-  public static function init() {
-    if ( ! self::$initiated ) {
-			self::init_hooks();
-		}
-  }
-  
-	public static function init_hooks() {
-    self::$initiated = true;
-    
-    //add admin menu
-    add_action('admin_menu', array( 'CPAdmin', 'register_menu_page' ));
-	}
-  
-  public static function register_menu_page() {
-    add_menu_page(
-      __( 'Cyptocurrency All-in-One', 'cryptocurrency' ),
-      __( 'Cyptocurrency', 'cryptocurrency' ),
-      'manage_options',
-      'cryptocurrency-prices',
-      array('CPAdmin', 'cryptocurrency_prices_admin'),
-      CP_URL.'images/btc.png',
-      81
-    );
-    
-    add_submenu_page( 
-      'cryptocurrency-prices', 
-      __( 'Help', 'cryptocurrency' ), 
-      __( 'Help', 'cryptocurrency' ), 
-      'manage_options', 
-      'cryptocurrency-prices', 
-      array('CPAdmin', 'cryptocurrency_prices_admin_help')
-    );
-    
-    add_submenu_page( 
-      'cryptocurrency-prices', 
-      __( 'Settings', 'cryptocurrency' ), 
-      __( 'Settings', 'cryptocurrency' ), 
-      'manage_options', 
-      'settings', 
-      array('CPAdmin', 'cryptocurrency_prices_admin_settings')
-    );
-  
-    add_submenu_page( 
-      'cryptocurrency-prices', 
-      __( 'Orders List', 'cryptocurrency' ), 
-      __( 'Orders List', 'cryptocurrency' ), 
-      'manage_options', 
-      'orders-list', 
-      array('CPAdmin', 'cryptocurrency_prices_admin_orders_list')
-    );
-    
-    add_submenu_page( 
-      'cryptocurrency-prices', 
-      __( 'Payment Settings', 'cryptocurrency' ), 
-      __( 'Payment Settings', 'cryptocurrency' ), 
-      'manage_options', 
-      'payment-settings',
-      array('CPAdmin', 'cryptocurrency_prices_admin_payment_settings') 
-    );
-    
-    add_submenu_page( 
-      'cryptocurrency-prices', 
-      __( 'Support', 'cryptocurrency' ), 
-      __( 'Support', 'cryptocurrency' ), 
-      'manage_options', 
-      'support',
-      array('CPAdmin', 'cryptocurrency_prices_admin_support') 
-    );
-  }
-  
-  public static function cryptocurrency_prices_admin(){
-    //self::cryptocurrency_prices_admin_help();
-  }
-  
-  public static function cryptocurrency_prices_admin_settings(){
-    //check if user has admin capability
-    if (current_user_can( 'manage_options' )){ 
-      
-      if (isset($_POST['cryptocurrency-prices-hide-credit']) and $_POST['cryptocurrency-prices-hide-credit']!=''){
-        //check nonce
-        check_admin_referer( self::NONCE );
-      
-        $sanitized_cryptocurrency_prices_hide_credit = (int)$_POST['cryptocurrency-prices-hide-credit'];
-        update_option('cryptocurrency-prices-hide-credit', $sanitized_cryptocurrency_prices_hide_credit);
-        $admin_message_html = '<div class="notice notice-success"><p>Plugin settings have been updated!</p></div>';
-      }
-      
-      if (isset($_POST['cryptocurrency-prices-file-get-contents']) and $_POST['cryptocurrency-prices-file-get-contents']!=''){
-        //check nonce
-        check_admin_referer( self::NONCE );
-        
-        $sanitized_cryptocurrency_prices_file_get_contents = (int)$_POST['cryptocurrency-prices-file-get-contents'];
-        update_option('cryptocurrency-prices-file-get-contents', $sanitized_cryptocurrency_prices_file_get_contents);
-        $admin_message_html = '<div class="notice notice-success"><p>Plugin settings have been updated!</p></div>';
-      }
-
-      if (isset($_POST['ethereum-api'])){
-        //check nonce
-        check_admin_referer( self::NONCE );
-        
-        $sanitized_ethereum_api = sanitize_text_field($_POST['ethereum-api']);
-        update_option('ethereum-api', $sanitized_ethereum_api);
-        $admin_message_html = '<div class="notice notice-success"><p>Plugin settings have been updated!</p></div>';
-      }
-      
-      if (isset($_POST['cryptocurrency-prices-css'])){
-        //check nonce
-        check_admin_referer( self::NONCE );
-        
-        $sanitized_cryptocurrency_prices_css = sanitize_text_field($_POST['cryptocurrency-prices-css']);
-        update_option('cryptocurrency-prices-css', $sanitized_cryptocurrency_prices_css);
-        $admin_message_html = '<div class="notice notice-success"><p>Plugin settings have been updated!</p></div>';
-      }
-    
-      if (get_option('cryptocurrency-prices-hide-credit') == 1){
-        $credit_selected = 'selected="selected"';
-      }
-      
-      if (get_option('cryptocurrency-prices-file-get-contents') == 1){
-        $file_get_contents_selected = 'selected="selected"';
-      }
-      
-      echo '
-      <div class="wrap cryptocurrency-admin">
-        '.$admin_message_html.'
-        <h1>Cyptocurrency All-in-One Settings:</h1>
-        
-        
-        <form action="" method="post">
-          
-          <h2>Compatibility:</h2>
-          <p>Activate if the plugin can not load data because of a problem with CURL library.</p>
-          <label>Use file_get_contents instead of CURL:</label>
-          <select name="cryptocurrency-prices-file-get-contents">
-            <option value="0">no</option>
-            <option value="1" '.$file_get_contents_selected.'>yes</option>
-          </select>
-
-          <h2>Ethereum blockchain node API URL:</h2>
-          <p>You need to set it up, if you will use the ethereum blockchain features. Example URLs http://localhost:8545 for your own node or register for a public node https://mainnet.infura.io/[your key].</p>
-          <input type="text" name="ethereum-api" value="'.get_option('ethereum-api').'" />
-  
-          <h2>Custom design:</h2>
-          <p>Write your custom CSS code here to style the plugin.</p>
-          <textarea name="cryptocurrency-prices-css" rows="5" cols="50">'.get_option('cryptocurrency-prices-css').'</textarea>
-  
-          <h2>Provide credit to plugin:</h2>
-          <p>By providing credit to the plugin you help more people install this plugin and make cryptocurrencies more popular.</p>
-          <label>Hide credit on plugin pages: </label>
-          <select name="cryptocurrency-prices-hide-credit">
-            <option value="0">no</option>
-            <option value="1" '.$credit_selected.'>yes</option>
-          </select>
-          
-          <br /><br />
-          '.wp_nonce_field( self::NONCE ).'        
-          <input type="submit" value="Save options" />
-        </form>
-      </div>
-      ';
-    
-    }
-  }
-  
-  public static function cryptocurrency_prices_admin_orders_list(){
-    global $wpdb;
-    $table_name = $wpdb->prefix.'cp_orders';
-    
-    //check if user has admin capability
-    if (current_user_can( 'manage_options' )){ 
-    
-      if ($_GET['delete']){
-        //delete orders
-      
-        //check nonce
-        //check_admin_referer( self::NONCE );
-        
-        $delete_order_id_sanitized = (int)$_GET['delete'];
-        $wpdb->get_results("DELETE FROM $table_name WHERE id = '$delete_order_id_sanitized';");
-        $admin_message_html = '<div class="notice notice-success"><p>The order has been deleted!</p></div>';
-      }
-    
-      $orders_html = '';
-      $orders = $wpdb->get_results("SELECT * FROM $table_name ORDER BY id DESC;"); 
-      if ($orders){
-        $orders_html .= '<table class="wp-list-table widefat fixed">';
-        $orders_html .= '
-          <tr>
-            <th>Date</th>
-            <th>Item</th>
-            <th>Price</th>
-            <th>Payment</th>
-            <th>Edit order</th>
-          </tr>
-        ';
-        foreach( $orders as $order_key => $order ) {
-          $orders_html .= '
-            <tr>
-              <td>'.htmlspecialchars($order->time).'</td>
-              <td>'.htmlspecialchars($order->item).'</td>
-              <td>'.htmlspecialchars($order->price).'</td>
-              <td>
-                '.htmlspecialchars($order->payment_address).'
-                <a href="https://blockchain.info/address/'.htmlspecialchars($order->payment_address).'" target="_blank">Track payment</a>
-              </td>
-              <td>
-                <a href="admin.php?page=orders-list&delete='.$order->id.'" onclick="return confirm(\'Are you sure you want to delete this item?\');">Delete order</a>
-              </td>
-            <tr>
-            <tr>
-              <td colspan="4">
-                Ordered by: '.htmlspecialchars($order->name).' 
-                Telephone: '.htmlspecialchars($order->telephone).' 
-                Email: '.htmlspecialchars($order->email).' 
-                Address: '.htmlspecialchars($order->address).'
-                '.$order->description.'
-              </td>
-            </tr>
-          ';
-        }
-        $orders_html .= '</table>';
-      } else {
-        //no orders received yet
-        $orders_html .= 'There are no payments yet!';
-      }
-          
-      echo '
-      <div class="wrap cryptocurrency-admin">
-        '.$admin_message_html.'
-        <h1>Cyptocurrency All-in-One List of Orders Received:</h1>
-        '.$orders_html.'     
-      ';
-  
-    }
-  }
-  
-  public static function cryptocurrency_prices_admin_payment_settings(){
-    //check if user has admin capability
-    if (current_user_can( 'manage_options' )){ 
-          
-      if (isset($_POST['cryptocurrency-payment-addresses'])){
-        //check nonce
-        check_admin_referer( self::NONCE );
-        
-        $sanitized_cryptocurrency_payment_addresses = sanitize_text_field($_POST['cryptocurrency-payment-addresses']);
-        update_option('cryptocurrency-payment-addresses', $sanitized_cryptocurrency_payment_addresses);
-        $admin_message_html = '<div class="notice notice-success"><p>Plugin settings have been updated!</p></div>';
-      }
-      
-      if (isset($_POST['cryptocurrency-payment-notifications-email'])){
-        //check nonce
-        check_admin_referer( self::NONCE );
-        
-        $sanitized_cryptocurrency_payment_notifications_email = sanitize_text_field($_POST['cryptocurrency-payment-notifications-email']);
-        update_option('cryptocurrency-payment-notifications-email', $sanitized_cryptocurrency_payment_notifications_email);
-        $admin_message_html = '<div class="notice notice-success"><p>Plugin settings have been updated!</p></div>';
-      }    
-      
-      echo '
-      <div class="wrap cryptocurrency-admin">
-        '.$admin_message_html.'
-        <h1>Cyptocurrency All-in-One Payment Settings:</h1>
-        <h2>Set these if you want to receive payments!</h2>
-        
-        <form action="" method="post">
-          <h2>BTC payment addresses:</h2>
-          <p>Write 1 BTC address per line (create the addresses in your wallet). The more addresses - the better. Each transaction uses 1 random address from the list.</p>
-          <textarea name="cryptocurrency-payment-addresses" rows="10" cols="50">'.get_option('cryptocurrency-payment-addresses').'</textarea>
-          
-          <h2>Payment notification email:</h2>
-          <p>You will receive payment notifications on this email. Leave blank if you do not want enail notifications.</p>
-          <input type="text" name="cryptocurrency-payment-notifications-email" value="'.get_option('cryptocurrency-payment-notifications-email').'" />
-              
-          <br /><br />
-          '.wp_nonce_field( self::NONCE ).'        
-          <input type="submit" value="Save options" />
-        </form>
-      </div>
-      ';
-    
-    }
-  }
-  
-  public static function cryptocurrency_prices_admin_support(){
-    echo '
-    <div class="wrap cryptocurrency-admin">
-    <h1>Cyptocurrency All-in-One Support:</h1>
-    '; 
-    
-    echo '
-    <h2>Get support:</h2>
-    <p>If have troubles running the plugin, please use the support forum: https://wordpress.org/support/plugin/cryptocurrency-prices.</p>
-    <p>If you need paid support with customizing the plugin or with plugin development, send me an email at boian_iankov@abv.bg.</p>
-    ';
-    
-    echo '
-    <h2>Your donations help</h2>
-    <p>Thank you so much for considering supporting my work. If you have benefited from this WordPress plugin, and feel led to send me a donation, please follow the donation options below. I am truly thankful for your hard earned giving.</p>
-    '.do_shortcode('[cryptodonation address="1ABwGVwbna6DnHgPefSiakyzm99VXVwQz9"]').'
-    <p>You can also <a href="http://creditstocks.com/donate/" target="_blank">visit our donations page</a>.</p>
-    ';
-    
-    echo ' 
-    </div>
-    ';
-  }
-  
-  public static function cryptocurrency_prices_admin_help(){
-    //set the active tab
-    $active_tab = isset( $_GET[ 'tab' ] ) ? $_GET[ 'tab' ] : 'calculator_exchange';
-    
-    echo '
-    <div class="wrap cryptocurrency-admin">
-      <h1>Cyptocurrency All-in-One Help:</h1>
-    ';
-
-    echo '
-      <h2 class="nav-tab-wrapper">
-          <a href="?page=cryptocurrency-prices&tab=calculator_exchange" class="nav-tab">Calculator, exchange rates</a>
-          <a href="?page=cryptocurrency-prices&tab=candlestick_chart" class="nav-tab">Price chart</a>
-          <a href="?page=cryptocurrency-prices&tab=list_cryptocurrencies" class="nav-tab">List all cryptocurrencies</a>
-          <a href="?page=cryptocurrency-prices&tab=orders_payments" class="nav-tab">Orders, payments</a>
-          <a href="?page=cryptocurrency-prices&tab=donations" class="nav-tab">Donations</a>
-          <a href="?page=cryptocurrency-prices&tab=ethereum" class="nav-tab">Ethereum Node</a>
-          <a href="?page=cryptocurrency-prices&tab=others" class="nav-tab">Other features</a>
-      </h2>
-    ';
-     
-    if ($active_tab == 'calculator_exchange'){
-      echo '
-        <h2>To display cryptocurrency calculator and exchange rates:</h2>
-        <p>To show cryptocurrency prices, add a shortcode to the text of the pages or posts where you want the cryptocurrency prices to apperar. Exapmle shortcodes:</p>
-        <pre>
-        [currencyprice currency1="btc" currency2="usd,eur,ltc,eth,jpy,gbp,chf,aud,cad,bgn"]
-        [currencyprice currency1="ltc" currency2="usd,eur,btc" feature="all"]
-        [currencyprice currency1="eth" currency2="usd,btc" feature="prices"]
-        [currencyprice currency1="eth" currency2="usd,btc" feature="calculator"]
-        </pre>
-        <p>You can also call the prices from the theme like this:</p>
-        <pre>
-        '.htmlspecialchars('<?php echo do_shortcode(\'[currencyprice currency1="btc" currency2="usd,eur"]\'); ?>').'
-        </pre>
-        <p>Major cryptocurrencies are fully supported with icons: Bitcoin BTC, Ethereum ETH, XRP, DASH, LTC, ETC, XMR, XEM, REP, MAID, PIVX, GNT, DCR, ZEC, STRAT, BCCOIN, FCT, STEEM, WAVES, GAME, DOGE, ROUND, DGD, LISK, SNGLS, ICN, BCN, XLM, BTS, ARDR, 1ST, PPC, NAV, XCP, NXT, LANA. Partial suport for over 1000 cryptocurrencies. Fiat currencies conversion supported: AUD, USD, CAD, GBP, EUR, CHF, JPY, CNY.</p>
-        <p><a href="https://creditstocks.com/cryptocurrency-prices/current-litecoin-price/" target="_blank">Live demo</a></p>
-      ';
-    }
-    
-    if ($active_tab == 'candlestick_chart'){
-      echo '
-        <h2>To display cryptocurrency candlestick price chart:</h2>
-        <p>To show cryptocurrency candlestick chart graphic, add a shortcode to the text of the pages or posts where you want the chart to apperar. Exapmle shortcodes:</p>
-        <pre>
-        [currencygraph currency1="btc" currency2="usd"]
-        [currencygraph currency1="dash" currency2="btc"]
-        </pre>
-        <p>You can also call the chart from the theme like this:</p>
-        <pre>
-        '.htmlspecialchars('<?php echo do_shortcode(\'[currencygraph currency1="btc" currency2="usd"]\'); ?>').' 
-        </pre>
-        <p><a href="https://creditstocks.com/cryptocurrency-prices/current-bitcoin-price/" target="_blank">Live demo</a></p>
-      ';
-    }
-    
-    if ($active_tab == 'list_cryptocurrencies'){
-      echo '
-        <h2>To display a list of all cryptocurrencies:</h2>
-        <p>Shortcodes:</p>
-        <pre>
-        [allcurrencies]
-        </pre>
-        <p>You can also call the list from the theme like this:</p>
-        <pre> 
-        '.htmlspecialchars('<?php echo do_shortcode(\'[allcurrencies]\'); ?>').'
-        </pre>
-        <p><a href="https://creditstocks.com/cryptocurrency-prices/list-of-all-cryptocurrencies/" target="_blank">Live demo</a></p>
-      ';
-    }
-    
-    if ($active_tab == 'orders_payments'){
-      echo '
-        <h2>To accept orders and bitcoin payments:</h2>
-        <p>
-          Open the plugin settings and under "Payment settings" fill in your BTC wallet addresses to receive payments and an email for receiving payment notifications.<br /> 
-          The plugin does not store your wallet\'s private keys. It uses one of the addresses from the provided list for every payment, by rotating all addresses and starting over from the first one. The different addresses are used to idenfiry if a specific payment has been made. You must provide enough addresses - more than the number of payments you will receive a day.<br /> 
-          Add a shortcode to the text of the pages or posts where you want to accept payments (typically these pages would contain a product or service that you are offering). The amount may be in BTC (default) or in fiat currency which will be converted it to BTC - USD, EUR, etc.<br />
-          Exapmle shortcodes:
-        </p>
-        <pre>
-        [cryptopayment item="Advertising services" amount="0.003"]
-        [cryptopayment item="Publish a PR article" amount="50 USD"]
-        </pre>
-        <p><a href="https://creditstocks.com/advertise/" target="_blank">Live demo</a></p>
-      ';
-    }
-    
-    if ($active_tab == 'donations'){
-      echo '
-        <h2>To accept cryptocurrency donations:</h2>
-        <p>Add a shortcode to the text of the pages or posts where you want to accept donations. Supported currencies are Bitcoin (BTC) (default), Ethereum (ETH), Litecon (LTC), Monero (XMR), Zcash (ZEC). Exapmle shortcodes (do not forget to put your wallet address):</p>
-        <pre>
-        [cryptodonation address="1ABwGVwbna6DnHgPefSiakyzm99VXVwQz9"]
-        [cryptodonation address="0xc85c5bef5a9fd730a429b0e04c69b60d9ef4c64b" currency="eth"]
-        [cryptodonation address="463tWEBn5XZJSxLU6uLQnQ2iY9xuNcDbjLSjkn3XAXHCbLrTTErJrBWYgHJQyrCwkNgYvyV3z8zctJLPCZy24jvb3NiTcTJ" paymentid="a1be1fb24f1e493eaebce2d8c92dc68552c165532ef544b79d9d36d1992cff07" currency="xmr"]
-        </pre>
-        <p>You can also call the donations from the theme like this:</p>
-        <pre>
-        '.htmlspecialchars('<?php echo do_shortcode(\'[cryptodonation address="1ABwGVwbna6DnHgPefSiakyzm99VXVwQz9"]\'); ?>').'
-        </pre>
-        <p><a href="https://creditstocks.com/donate/" target="_blank">Live demo</a></p>
-      ';
-    }
-
-    if ($active_tab == 'ethereum'){
-      echo '
-        <h2>Ethereum node integration:</h2>
-        <p>Currently supported features are: check Ethereum address balance, view ethereum block. Before using the shortcodes you need to fill in your Ethereum node API URL in the plugin settings (http://localhost:8545 or a public node at infura.io). Exapmle shortcodes:</p>
-        <pre>
-        [cryptoethereum feature="balance"]
-        [cryptoethereum feature="block"]
-        </pre>
-        <p><a href="https://creditstocks.com/ethereum/" target="_blank">Live demo</a></p>
-      ';
-    }
-    
-    if ($active_tab == 'others'){
-      echo '
-        <h2>Instructions to use the plugin in a widget:</h2>
-        <p>To use the plugin in a widget, use the provided "CP Shortcode Widget" and put the shortcode in the "Content" section, for example:</p>
-        <pre>
-        [currencyprice currency1="btc" currency2="usd,eur"]
-        </pre>
-      ';
-    }
-    
-    echo '    
-    </div>
-    ';
-  }
+<?php
+
+class CPAdmin {
+
+  const NONCE = 'cp-admin-settings';
+
+  
+
+  private static $initiated = false;
+
+	
+
+  public static function init() {
+
+    if ( ! self::$initiated ) {
+
+			self::init_hooks();
+
+		}
+
+  }
+
+  
+
+	public static function init_hooks() {
+
+    self::$initiated = true;
+
+    
+
+    //add admin menu
+
+    add_action( 'admin_menu', array( 'CPAdmin', 'register_menu_page' ) );
+		add_action( 'admin_init', array( 'CPAdmin', 'dismiss_notices' ) );
+		add_action( 'admin_notices', array( 'CPAdmin', 'admin_notices' ) );
+
+  }
+  
+	public static function admin_notices() {
+		if ( get_option( 'cryptocurrency-hide-update-notice-3.0.12' ) != true ) {
+			?>
+	<div class="notice notice-info is-dismissible">
+		<p><?php _e( 'Thanks for updating Cryptocurrency. With this new version, you can now EARN CRYPTO! Rush to <a target="_blank" href="https://zwaply.com/register/">create your Zwaply username</a> and start earning crypto. <a target="_blank" href="https://zwaply.com/zwaply-for-web/">Learn more about Zwaply</a>.', 'cryptocurrency-prices' ); ?></p>
+		<p style="margin-bottom:10px;font-size: 8pt;"><a href="<?php echo admin_url( '?action=cryptocurrency-dismiss-update-notice' ); ?>"><?php _e( 'Dismiss notice', 'crypto-coin-ticker' ); ?></a></p>
+	</div>
+			<?php
+		}
+	}
+
+	public static function dismiss_notices() {
+		if ( isset( $_GET['action'] ) && 'cryptocurrency-dismiss-update-notice' === $_GET['action'] ) {
+			update_option( 'cryptocurrency-hide-update-notice-3.0.12', true );
+		}
+	}
+
+  
+
+  public static function register_menu_page() {
+
+    add_menu_page(
+
+      __( 'Cyptocurrency All-in-One', 'cryptocurrency' ),
+
+      __( 'Cyptocurrency', 'cryptocurrency' ),
+
+      'manage_options',
+
+      'cryptocurrency-prices',
+
+      array('CPAdmin', 'cryptocurrency_prices_admin'),
+
+      CP_URL.'images/admin-icon.png',
+
+      81
+
+    );
+
+    
+
+    add_submenu_page( 
+
+      'cryptocurrency-prices', 
+
+      __( 'Help', 'cryptocurrency' ), 
+
+      __( 'Help', 'cryptocurrency' ), 
+
+      'manage_options', 
+
+      'cryptocurrency-prices', 
+
+      array('CPAdmin', 'cryptocurrency_prices_admin_help')
+
+    );
+
+    
+
+    add_submenu_page( 
+
+      'cryptocurrency-prices', 
+
+      __( 'Crypto Resources', 'cryptocurrency' ), 
+
+      __( 'Crypto Resources', 'cryptocurrency' ), 
+
+      'manage_options', 
+
+      'resources', 
+
+      array('CPAdmin', 'cryptocurrency_prices_admin_resources')
+
+    );
+
+    
+
+    add_submenu_page( 
+
+      'cryptocurrency-prices', 
+
+      __( 'Settings', 'cryptocurrency' ), 
+
+      __( 'Settings', 'cryptocurrency' ), 
+
+      'manage_options', 
+
+      'settings', 
+
+      array('CPAdmin', 'cryptocurrency_prices_admin_settings')
+
+    );
+
+    
+
+    add_submenu_page( 
+
+      'cryptocurrency-prices', 
+
+      __( 'Affiliate Panel', 'cryptocurrency' ), 
+
+      __( 'Affiliate Panel', 'cryptocurrency' ), 
+
+      'manage_options', 
+
+      'affiliate-panel', 
+
+      array('CPAdmin', 'cryptocurrency_prices_admin_affiliate_panel')
+
+    );
+
+    
+
+    add_submenu_page( 
+
+      'cryptocurrency-prices', 
+
+      __( 'Premium and Updates', 'cryptocurrency' ), 
+
+      __( 'Premium and Updates', 'cryptocurrency' ), 
+
+      'manage_options', 
+
+      'premium',
+
+      array('CPAdmin', 'cryptocurrency_prices_admin_premium') 
+
+    );
+
+  }
+
+  
+
+  public static function cryptocurrency_prices_admin(){
+
+    //self::cryptocurrency_prices_admin_help();
+
+  }
+
+  
+
+  public static function cryptocurrency_prices_admin_resources(){
+
+    //check if user has admin capability
+
+    if (current_user_can( 'manage_options' )){ 
+
+      echo '
+
+      <div class="wrap cryptocurrency-admin">
+
+        '.$admin_message_html.'
+
+        <h1>Cyptocurrency Resources:</h1>
+
+        
+
+        <p>You will find a list of resources, specially selected for the users of Cyptocurrency All-in-One.</p>
+
+
+
+        <h2>Buy Bitcoin and other cryptocurrency</h2>
+
+        <a href="https://cex.io/r/1/byankov/1">Buy Bitcoin and excnahge it to other cryptocurrency at CEX.IO</a><br />
+
+
+
+        <h2>Create Bitcoin and altcoin wallets</h2>
+
+        <a href="https://www.ledgerwallet.com/products/ledger-nano-s">Hardware wallet Ledger Nano S. Very secure but costs money.  Works for receiving donations and payments.</a><br />
+
+        <a href="https://trezor.io/">Hardware wallet TREZOR. Very secure but costs money.  Works for receiving donations and payments.</a><br />
+
+        <a href="https://bitcoin.org/en/download ">Official bitcoin software wallet (hot wallet). Relatively secure. Works for receiving donations and payments.</a><br />
+
+        <a href="https://cex.io/r/0/byankov/0">Exchange site CEX.IO - allows one bitcoin wallet and one wallet for every altcoin. Very easy to use. Works for receiving donations.</a><br />
+
+        <a href="https://yobit.io/?bonus=srtAb">Exchange site YoBit.net - allows one bitcoin wallet and one wallet for every altcoin. Very easy to use. Works for receiving donations.</a><br />
+
+
+
+        <h2>Trade and exchange cryptocurrency</h2>
+
+        <a href="https://yobit.io/?bonus=srtAb">Exchange with many coins and low fees for trading - YObit.net</a><br />
+
+        <a href="https://cex.io/r/0/byankov/0">Trusted exchange site - CEX.IO</a><br />
+
+        <a href="https://creditstocks.com/cryptocurrency-prices/list-of-all-cryptocurrencies/">List of all cryptocurrencies</a><br />
+
+        More trading tools - coming soon<br />
+
+
+
+        <h2>Publish cryptocurrency article</h2>
+
+        <a href="https://creditstocks.com/submit-article-creditstocks-com/">Publish cryptocurrency or finance article at CreditStocks.com - free</a><br />
+
+        <a href="http://satoshijournal.com/submit-an-article/">Publish cryptocurrency or finance article at SatochiJournal.com - free</a><br />
+
+
+
+        <h2>Cryptocurrency mining</h2>
+
+        <a href="http://www.whattomine.com/">Mining calculator - What to mine</a><br />
+
+        <a href="https://www.cryptocompare.com/mining/calculator/btc">Mining calculator - Bitcoin</a><br />
+
+        <a href="https://www.cryptocompare.com/mining/calculator/eth">Mining calculator - Ethereum</a><br />
+
+
+
+        <h2>Development resources</h2>
+
+        <a href="https://theethereum.wiki/w/index.php/ERC20_Token_Standard">ERC20 - Ethereum token standard</a><br />
+
+        <a href="https://infura.io/">Infura - Open and free to use Ethereum node</a><br />
+
+        <a href="https://coinmarketcap.com/api/">Free data API about cryptocurrencies - CoinMarketCap</a><br />
+
+        <a href="https://www.cryptocompare.com/api/">Free data API about cryptocurrencies - CryptoCompare</a><br />
+
+
+
+        <h2>Crypto community</h2>
+
+        <a href="https://web.facebook.com/groups/469221573283979/">Knights of Satoshi - Facebook group</a><br />
+
+        <a href="https://bitcointalk.org/">BitcoinTalk.org - the largest Bitcoin and cryptocurrency forum</a>
+
+        
+
+        <p><small>* The list is not a recommendation ot the listed services. This is just a list of what we use - you may decide to use them or not at your own risk. Some links may be links to external services, affiliate links, or links that do not work anymore.</small></p>
+
+        
+
+      </div>
+
+      ';
+
+    
+
+    }
+
+      
+
+  }  
+
+  
+
+  public static function cryptocurrency_prices_admin_affiliate_panel(){
+
+    //check if user has admin capability
+
+    if (current_user_can( 'manage_options' )){
+		  include_once dirname( __FILE__ ) . '/../parts/cryptocurrency-affiliate-panel.php';
+    }
+      
+
+  }     
+
+  
+
+  public static function cryptocurrency_prices_admin_settings(){
+
+    //check if user has admin capability
+
+    if (current_user_can( 'manage_options' )){ 
+
+      $admin_message_html = '';
+
+      
+
+      if (isset($_POST['cryptocurrency-prices-zwaply-affiliate-id'])){
+
+        //check nonce
+
+        check_admin_referer( self::NONCE );
+
+        
+
+        $sanitized_ethereum_api = sanitize_text_field($_POST['cryptocurrency-prices-zwaply-affiliate-id']);
+
+        update_option('cryptocurrency-prices-zwaply-affiliate-id', $sanitized_ethereum_api);
+
+        $admin_message_html = '<div class="notice notice-success"><p>Plugin settings have been updated!</p></div>';
+
+      }
+      
+
+      if (isset($_POST['cp_coinmarketcap_api_key'])){
+
+        //check nonce
+
+        check_admin_referer( self::NONCE );
+
+        
+
+        $sanitized_coinmarketcap_api_key = sanitize_text_field($_POST['cp_coinmarketcap_api_key']);
+
+        update_option('cp_coinmarketcap_api_key', $sanitized_coinmarketcap_api_key);
+
+        $admin_message_html = '<div class="notice notice-success"><p>Plugin settings have been updated!</p></div>';
+
+      }
+
+
+
+      if (isset($_POST['cryptocurrency-prices-default-css']) and $_POST['cryptocurrency-prices-default-css']!=''){
+
+        //check nonce
+
+        check_admin_referer( self::NONCE );
+
+              
+
+        $sanitized_cryptocurrency_prices_default_css = sanitize_text_field($_POST['cryptocurrency-prices-default-css']);
+
+        update_option('cryptocurrency-prices-default-css', $sanitized_cryptocurrency_prices_default_css);
+
+        $admin_message_html = '<div class="notice notice-success"><p>Plugin settings have been updated!</p></div>';
+
+      }
+
+
+      if (isset($_POST['cryptocurrency-prices-show-trade-button'])){
+
+        //check nonce
+
+        check_admin_referer( self::NONCE );
+
+        
+
+        $show_trade_button = 'yes' === $_POST['cryptocurrency-prices-show-trade-button'] ? 'yes' : 'no';
+
+        update_option('cryptocurrency-prices-show-trade-button', $show_trade_button);
+
+        $admin_message_html = '<div class="notice notice-success"><p>Plugin settings have been updated!</p></div>';
+
+      }
+
+      
+
+      if (isset($_POST['ethereum-api'])){
+
+        //check nonce
+
+        check_admin_referer( self::NONCE );
+
+        
+
+        $sanitized_ethereum_api = sanitize_text_field($_POST['ethereum-api']);
+
+        update_option('ethereum-api', $sanitized_ethereum_api);
+
+        $admin_message_html = '<div class="notice notice-success"><p>Plugin settings have been updated!</p></div>';
+
+      }
+
+      
+
+      if (isset($_POST['cryptocurrency-prices-css'])){
+
+        //check nonce
+
+        check_admin_referer( self::NONCE );
+
+        
+
+        $sanitized_cryptocurrency_prices_css = sanitize_text_field($_POST['cryptocurrency-prices-css']);
+
+        update_option('cryptocurrency-prices-css', $sanitized_cryptocurrency_prices_css);
+
+        $admin_message_html = '<div class="notice notice-success"><p>Plugin settings have been updated!</p></div>';
+
+      }
+
+      
+
+      //delete_option( 'cryptocurrency-prices-default-css' ); //remove setting
+
+      $default_css_selected_light = '';
+
+      $default_css_selected_dark = '';
+
+      if (get_option('cryptocurrency-prices-default-css') == 'light'){
+
+        $default_css_selected_light = 'selected="selected"';
+
+      } elseif (get_option('cryptocurrency-prices-default-css') == 'dark'){
+
+        $default_css_selected_dark = 'selected="selected"';
+
+      }
+      
+
+      $show_trade_button_option_yes = '';
+
+      $show_trade_button_option_no = '';
+
+      if (get_option('cryptocurrency-prices-show-trade-button') == 'yes'){
+
+        $show_trade_button_option_yes = 'selected="selected"';
+
+      } elseif (get_option('cryptocurrency-prices-show-trade-button') == 'no'){
+
+        $show_trade_button_option_no = 'selected="selected"';
+
+      }
+
+      
+
+      echo '
+
+      <div class="wrap cryptocurrency-admin">
+
+        '.$admin_message_html.'
+
+        <h1>Cyptocurrency All-in-One Settings:</h1>
+
+          
+
+        <form action="" method="post">
+
+          <h2>Affiliate:</h2>
+
+          <label>Your Zwaply.com username: </label>
+
+          <div style="display: inline-block;">
+          <label for="cryptocurrency-prices-zwaply-affiliate-id">
+            <input class="cryptocurrency-prices-zwaply-affiliate-id" id="cryptocurrency-prices-zwaply-affiliate-id" name="cryptocurrency-prices-zwaply-affiliate-id" type="text" value="'.get_option('cryptocurrency-prices-zwaply-affiliate-id').'">
+          </label>
+          <span><span class="description"><a href="https://zwaply.com/register/" target="_blank">Get yours here to start earning crypto</a></span></span>
+          </div>
+
+          <h2>CoinMarketCap Api:</h2>
+
+          <p>The prices of the coins refresh every 30 minutes by default. If you\'d like them to update every 2 mins, please register for a free api key here: <a href="https://pro.coinmarketcap.com/" target="_blank">https://pro.coinmarketcap.com</a> </p>
+
+          <label>Your free api key: </label>
+
+          <div style="display: inline-block;">
+          <label for="cp_coinmarketcap_api_key">
+            <input class="cp_coinmarketcap_api_key" id="cp_coinmarketcap_api_key" name="cp_coinmarketcap_api_key" type="text" value="'.get_option('cp_coinmarketcap_api_key').'">
+          </label>
+          </div>
+
+          <h2>Design:</h2>
+
+          <label>Show Trade button: </label>
+
+          <select name="cryptocurrency-prices-show-trade-button">
+
+            <option value="yes" '.$show_trade_button_option_yes.'>Yes</option>
+
+            <option value="no" '.$show_trade_button_option_no.'>No</option>
+
+          </select>
+
+          <p></p>
+
+          <label>Use default design (insludes default CSS): </label>
+
+          <select name="cryptocurrency-prices-default-css">
+
+            <option value="0">no</option>
+
+            <option value="light" '.$default_css_selected_light.'>light</option>
+
+            <option value="dark" '.$default_css_selected_dark.'>dark</option>
+
+          </select>
+
+
+
+          <p>Write your custom CSS code here to style the plugin. Check the <a href="https://wordpress.org/support/plugin/cryptocurrency-prices/" target="_blank">support forum</a> for examples.</p>
+
+          <textarea name="cryptocurrency-prices-css" rows="5" cols="50">'.get_option('cryptocurrency-prices-css').'</textarea>
+
+
+
+          <h2>Ethereum blockchain node API URL:</h2>
+
+          <p>You need to set it up, if you will use the ethereum blockchain features. Example URLs http://localhost:8545 for your own node or register for a public node https://mainnet.infura.io/[your key].</p>
+
+          <input type="text" name="ethereum-api" value="'.get_option('ethereum-api').'" />
+
+          
+
+          <br /><br />
+
+          '.wp_nonce_field( self::NONCE ).'        
+
+          <input type="submit" value="Save options" />
+
+        </form>
+
+      </div>
+
+      ';
+
+    
+
+    }
+
+  }
+
+  
+
+  public static function cryptocurrency_prices_admin_premium(){
+
+    echo '
+
+    <div class="wrap cryptocurrency-admin">
+
+    <h1>Cyptocurrency All-in-One Premium Version and Updates::</h1>
+
+    '; 
+
+    
+
+    echo '
+
+    <h2>Get premium version</h2>
+
+    <p>The premium version has a lot more features than the free version + free support. To get the premium version visit this page <a href="https://creditstocks.com/cryptocurrency-one-wordpress-plugin/">https://creditstocks.com/cryptocurrency-one-wordpress-plugin/</a><p>
+
+    <h2>Premium version updates</h2>
+
+    <p>The premium version of the plugin is constantly updated. Updates include new features, improvements of existing features and security improvements. It is highly recommended that you keep your plugin updated.</p>
+
+    <p>Premium version updates are manual. To check your current version, visit the <a href="plugins.php" target="_blank">Plugins page</a>. To purchase updates, visit the plugin web site: <a href="https://creditstocks.com/cryptocurrency-one-wordpress-plugin/" target="_blank">https://creditstocks.com/cryptocurrency-one-wordpress-plugin/</a></p>
+
+    ';
+
+    
+
+    echo ' 
+
+    </div>
+
+    ';
+
+  }
+
+  
+
+  public static function cryptocurrency_prices_admin_help(){
+
+    //set the active tab
+
+    $active_tab = isset( $_GET[ 'tab' ] ) ? $_GET[ 'tab' ] : 'exchange';
+
+    
+
+    echo '
+
+    <div class="wrap cryptocurrency-admin">
+
+      <h1>Cyptocurrency All-in-One Help:</h1>
+
+    ';
+
+
+
+    echo '
+
+      <h2 class="nav-tab-wrapper">
+
+          <a href="?page=cryptocurrency-prices&tab=exchange" class="nav-tab">Exchange rates</a>
+
+          <a href="?page=cryptocurrency-prices&tab=calculator" class="nav-tab">Calculator</a>
+
+          <a href="?page=cryptocurrency-prices&tab=candlestick_chart" class="nav-tab">Price chart</a>
+
+          <a href="?page=cryptocurrency-prices&tab=ticker_widget" class="nav-tab">Ticker widget</a>
+
+          <a href="?page=cryptocurrency-prices&tab=list_cryptocurrencies" class="nav-tab">List all cryptocurrencies</a>
+
+          <a href="?page=cryptocurrency-prices&tab=orders_payments" class="nav-tab">Orders, payments</a>
+
+          <a href="?page=cryptocurrency-prices&tab=donations" class="nav-tab">Donations</a>
+
+          <a href="?page=cryptocurrency-prices&tab=ethereum" class="nav-tab">Ethereum Node</a>
+
+          <a href="?page=cryptocurrency-prices&tab=others" class="nav-tab">Other features</a>
+
+      </h2>
+
+    ';
+
+    
+
+    if ($active_tab == 'exchange'){
+
+      echo '
+
+        <h2>To display cryptocurrency exchange rates (premium version only):</h2>
+
+        <p>To show cryptocurrency prices, add a shortcode to the text of the pages or posts where you want the cryptocurrency prices to apperar. Exapmle shortcodes:</p>
+
+        [currencyprice currency1="btc" currency2="usd,eur,ltc,eth,jpy,gbp,chf,aud,cad"]<br />
+
+        [currencyprice currency1="ltc" currency2="usd,eur,btc"]
+
+        <p>You can also call the prices from the theme like this:</p>
+
+        '.htmlspecialchars('<?php echo do_shortcode(\'[currencyprice currency1="btc" currency2="usd,eur"]\'); ?>').'
+
+        <p>Most cryptocurrencies are supported and the major ones also have icons: Bitcoin BTC, Ethereum ETH, XRP, DASH, LTC, ETC, XMR, XEM, REP, MAID, PIVX, GNT, DCR, ZEC, STRAT, BCCOIN, FCT, STEEM, WAVES, GAME, DOGE, ROUND, DGD, LISK, SNGLS, ICN, BCN, XLM, BTS, ARDR, 1ST, PPC, NAV, XCP, NXT, LANA. Partial suport for over 1000 cryptocurrencies. Fiat currencies conversion supported: AUD, USD, CAD, GBP, EUR, CHF, JPY, CNY.</p>
+
+        <p><a href="https://creditstocks.com/cryptocurrency-prices/current-litecoin-price/" target="_blank">Live demo</a></p>
+
+      ';
+
+    }
+
+    
+
+    if ($active_tab == 'calculator'){
+
+      echo '
+
+        <h2>To display cryptocurrency calculator (premium version only):</h2>
+
+        <p>To show cryptocurrency calculator, add a shortcode to the text of the pages or posts where you want the calculator prices to apperar. Exapmle shortcodes:</p>
+
+        [currencycalculator currency1="btc" currency2="usd,eur,ltc,eth,jpy,gbp,chf,aud,cad"]<br />
+
+        [currencycalculator currency1="ltc" currency2="usd,eur,btc"]
+
+        <p>You can also call the calculator from the theme like this:</p>
+
+        '.htmlspecialchars('<?php echo do_shortcode(\'[currencycalculator currency1="btc" currency2="usd,eur"]\'); ?>').'
+
+        <p>Most cryptocurrencies are supported and the major ones also have icons: Bitcoin BTC, Ethereum ETH, XRP, DASH, LTC, ETC, XMR, XEM, REP, MAID, PIVX, GNT, DCR, ZEC, STRAT, BCCOIN, FCT, STEEM, WAVES, GAME, DOGE, ROUND, DGD, LISK, SNGLS, ICN, BCN, XLM, BTS, ARDR, 1ST, PPC, NAV, XCP, NXT, LANA. Partial suport for over 1000 cryptocurrencies. Fiat currencies conversion supported: AUD, USD, CAD, GBP, EUR, CHF, JPY, CNY.</p>
+
+        <p><a href="https://creditstocks.com/cryptocurrency-prices/current-litecoin-price/" target="_blank">Live demo</a></p>
+
+      ';
+
+    }
+
+    
+
+    if ($active_tab == 'candlestick_chart'){
+
+      echo '
+
+        <h2>To display cryptocurrency candlestick price chart (premium version only):</h2>
+
+        <p>To show cryptocurrency candlestick chart graphic, add a shortcode to the text of the pages or posts where you want the chart to apperar. Set the cryptocurrency that you want on the chart as currency1 and the base currency as currency2. Supported periods are 1hour, 24hours, 7days, 30days, 1year. Exapmle shortcodes:</p>
+
+        [currencychart currency1="btc" currency2="usd"]<br />
+
+        [currencychart currency1="dash" currency2="btc" defaultperiod="1year"]
+
+        <p>You can also call the chart from the theme like this:</p>
+
+        '.htmlspecialchars('<?php echo do_shortcode(\'[currencychart currency1="btc" currency2="usd"]\'); ?>').' 
+
+        <p><a href="https://creditstocks.com/cryptocurrency-prices/current-bitcoin-price/" target="_blank">Live demo</a></p>
+
+      ';
+
+    }
+
+        
+
+    if ($active_tab == 'ticker_widget'){
+
+      echo '
+
+        <h2>Cryptocurrency ticker widget - a badge with the logo, price, and 24h change of one cryptocurrency:</h2>
+
+        <p>To show the cryptocurrency ticker widget go to Appearance / Widgets and add the widget to the widget area where you want it to appear. Set the cryptocurrency you wan to show - for example BTC. Or add the following shortcode to the text of the pages or posts where you want the widget to appear. Exapmle shortcodes:</p> 
+
+        [currencyticker currency="eth"]<br />
+
+        <p><a href="https://creditstocks.com/cryptocurrency-prices/current-bitcoin-price/" target="_blank">Live demo</a></p>
+
+      ';
+
+    }
+
+    
+
+    if ($active_tab == 'list_cryptocurrencies'){
+
+      echo '
+
+        <h2>To display a list of all cryptocurrencies</h2>
+
+        <p>Add a shortcode to the text of the pages or posts where you want to display CoinMarketCap style list of all cryptocurrencies. The list is paginated, sortable, searchable. The shortcode supports selecting the base currency for showing the prices, default is USD. You can set the total number of cryptocurrencies (default 500), the cryptocurrencies per page (default 100), the number format locale. Exapmle shortcodes:</p>
+
+        [allcurrencies]<br />
+
+        [allcurrencies basecurrency="eur"]<br />
+
+        [allcurrencies limit="100" perpage="10"]<br />
+
+        [allcurrencies basecurrency="eur" locale="de-DE"]
+
+        <p>You can also call the list from the theme like this:</p>
+
+        '.htmlspecialchars('<?php echo do_shortcode(\'[allcurrencies]\'); ?>').'
+
+        <p><a href="https://creditstocks.com/cryptocurrency-prices/list-of-all-cryptocurrencies/" target="_blank">Live demo</a></p>
+
+      ';
+
+    }
+
+    
+
+    if ($active_tab == 'orders_payments'){
+
+      echo '
+
+        <h2>To accept cryptocurrency orders and payments (premium version only):</h2>
+
+        <p>Supported currencies for payments are:</p> 
+
+        <ul>
+
+          <li>Bitcoin (BTC) (default),</li> 
+
+          <li>Ethereum (ETH),</li> 
+
+          <li>Litecoin (LTC),</li> 
+
+          <li>Bitcoin Cash (BCH),</li> 
+
+          <li>Zcash (ZEC).</li> 
+
+        </ul>
+
+        <p> 
+
+          Open the plugin settings and under "Payment settings" fill in your BTC (or other cryptocurrency) wallet addresses to receive payments and an email for receiving payment notifications.<br />  
+
+          The plugin does not store your wallet\'s private keys. It uses one of the addresses from the provided list for every payment, by rotating all addresses and starting over from the first one. The different addresses are used to idenfiry if a specific payment has been made. You must provide enough addresses - more than the number of payments you will receive a day. <br /> 
+
+          Add a shortcode to the text of the pages or posts where you want to accept payments (typically these pages would contain a product or service that you are offering). The amount may be in BTC (default), Ethereum (ETH), Litecon (LTC) or in fiat currency (USD, EUR, etc), which will be converted it to the selected cryptocurrency.<br /> 
+
+          Exapmle shortcodes:
+
+        </p>
+
+        [cryptopayment item="Advertising services" amount="0.003" currency="BTC"]<br />
+
+        [cryptopayment item="Publish a PR article" amount="50 USD" currency="BTC"]<br />
+
+        [cryptopayment item="Publish a PR article" amount="10 EUR" currency="ETH"]
+
+        <p><a href="https://creditstocks.com/payment-demo/" target="_blank">Live demo</a></p>
+
+      ';
+
+    }
+
+    
+
+    if ($active_tab == 'donations'){
+
+      echo '
+
+        <h2>To accept cryptocurrency donations:</h2>
+
+        <p>Add a shortcode to the text of the pages or posts where you want to accept donations. Supported currencies are:</p>
+
+        <ul>
+
+          <li>Bitcoin (BTC) (default),</li> 
+
+          <li>Ethereum (ETH),</li> 
+
+          <li>Litecoin (LTC),</li> 
+
+          <li>Monero (XMR),</li>
+
+          <li>Bitcoin Cash (BCH),</li> 
+
+          <li>Zcash (ZEC).</li> 
+
+        </ul>
+
+        <p>Exapmle shortcodes (do not forget to put your wallet address):</p>
+
+        [cryptodonation address="1ABwGVwbna6DnHgPefSiakyzm99VXVwQz9"]<br />
+
+        [cryptodonation address="0xc85c5bef5a9fd730a429b0e04c69b60d9ef4c64b" currency="eth"]<br />
+
+        [cryptodonation address="463tWEBn5XZJSxLU6uLQnQ2iY9xuNcDbjLSjkn3XAXHCbLrTTErJrBWYgHJQyrCwkNgYvyV3z8zctJLPCZy24jvb3NiTcTJ" paymentid="a1be1fb24f1e493eaebce2d8c92dc68552c165532ef544b79d9d36d1992cff07" currency="xmr"]
+
+        <p>You can also call the donations from the theme like this:</p>
+
+        '.htmlspecialchars('<?php echo do_shortcode(\'[cryptodonation address="1ABwGVwbna6DnHgPefSiakyzm99VXVwQz9"]\'); ?>').'
+
+        <p><a href="https://creditstocks.com/donate/" target="_blank">Live demo</a></p>
+
+      ';
+
+    }
+
+
+
+    if ($active_tab == 'ethereum'){
+
+      echo '
+
+        <h2>Ethereum node integration:</h2>
+
+        <p>Currently supported features are: check Ethereum address balance, view ethereum block. Before using the shortcodes you need to fill in your Ethereum node API URL in the plugin settings (http://localhost:8545 or a public node at infura.io). Exapmle shortcodes:</p>
+
+        [cryptoethereum feature="balance"]<br />
+
+        [cryptoethereum feature="block"]
+
+        <p>Notice: Beware mixed content browser restriction! If your web site uses https, the node must also use https.</p>
+
+        <p><a href="https://creditstocks.com/ethereum/" target="_blank">Live demo</a></p>
+
+      ';
+
+    }
+
+    
+
+    if ($active_tab == 'others'){
+
+      echo '
+
+        <h2>Instructions to use the plugin in a widget:</h2>
+
+        <p>To use the plugin in a widget, use the provided "CP Shortcode Widget" and put the shortcode in the "Content" section, for example:</p>
+
+        [currencyprice currency1="btc" currency2="usd,eur"]
+
+      ';
+
+    }
+
+    
+
+    echo '    
+
+    </div>
+
+    ';
+
+  }
+
 }

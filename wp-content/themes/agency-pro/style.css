@@ -1544,7 +1544,7 @@ Content Area
 --------------------------------------------- */
 
 .entry:not(.post-5) {
-	background-color: #fff;
+	background-color: black;
 	border-radius: 3px;
 	margin-bottom: 40px;
 	padding: 40px 40px 24px;

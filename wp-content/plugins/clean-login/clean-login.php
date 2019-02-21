@@ -1,14 +1,14 @@
 <?php
 /**
  * @package Clean_Login
- * @version 1.8.2
+ * @version 1.9.8
  */
 /*
 Plugin Name: Clean Login
 Plugin URI: http://cleanlogin.codection.com
 Description: Responsive Frontend Login and Registration plugin. A plugin for displaying login, register, editor and restore password forms through shortcodes. [clean-login] [clean-login-edit] [clean-login-register] [clean-login-restore]
 Author: codection
-Version: 1.8.2
+Version: 1.9.8
 Author URI: https://codection.com
 Text Domain: clean-login
 Domain Path: /lang
@@ -112,6 +112,7 @@ function clean_login_register_show($atts) {
 	
 	$param = shortcode_atts( array(
         'role' => false,
+		'template' => 'register-form.php',
     ), $atts );
 
 	ob_start();
@@ -135,6 +136,8 @@ function clean_login_register_show($atts) {
 			echo "<div class='cleanlogin-notification error'><p>". __( 'Passwords must be identical and filled', 'clean-login' ) ."</p></div>";
 		else if ( $_GET['created'] == 'wrongmail' )
 			echo "<div class='cleanlogin-notification error'><p>". __( 'Email is not valid', 'clean-login' ) ."</p></div>";
+		else if ( $_GET['created'] == 'emailexists' )
+			echo "<div class='cleanlogin-notification error'><p>". __( 'There is already a user registered with this email. Login with this existing account. If you do not remember your password, you will find a recuperation link at the login form.', 'clean-login' ) ."</p></div>";
 		else if ( $_GET['created'] == 'wrongcaptcha' )
 			echo "<div class='cleanlogin-notification error'><p>". __( 'CAPTCHA is not valid, please try again', 'clean-login' ) ."</p></div>";
 		else if ( $_GET['created'] == 'failed' )
@@ -144,7 +147,7 @@ function clean_login_register_show($atts) {
 	}
 
 	if ( !is_user_logged_in() ) {
-		clean_login_get_template_file( 'register-form.php', $param );
+		clean_login_get_template_file( $param['template'], $param );
 	} else {
 		echo "<div class='cleanlogin-notification error'><p>". __( 'You are now logged in. It makes no sense to register a new user', 'clean-login' ) ."</p></div>";
 		clean_login_get_template_file( 'login-preview.php' );
@@ -220,6 +223,46 @@ function clean_login_is_password_complex($candidate) {
     $ = end of the string */
 }
 
+/**
+ * Check the captcha parameter with google server
+ *
+ * @return true if the gcaptcha was valid or false otherwise
+ * @since 1.9
+ */
+function valid_gcaptcha() {
+  // gcaptcha field sent within the form
+  $gcaptcha_par = isset( $_POST['g-recaptcha-response'] ) ? sanitize_text_field( $_POST['g-recaptcha-response'] ) : '';
+  // IP doing the request
+  $remote_ip = $_SERVER["REMOTE_ADDR"];
+  // secret key gcaptcha
+  $secret_key_gcaptcha = get_option( 'cl_gcaptcha_secretkey' );
+
+  if ($gcaptcha_par != '') {
+    // make a GET request to the Google reCAPTCHA Server
+    $request_gcaptcha = wp_remote_get(
+      'https://www.google.com/recaptcha/api/siteverify?secret=' . $secret_key_gcaptcha . '&response=' . $gcaptcha_par . '&remoteip=' . $remote_ip
+    );
+    // get the request response body
+    $response_body_gcaptcha = wp_remote_retrieve_body( $request_gcaptcha );
+    $result_gcaptcha = json_decode( $response_body_gcaptcha, true );
+    return $result_gcaptcha['success'];
+  }
+  return false;
+}
+
+/**
+* Print the google api script for gcaptcha
+*
+* @since 1.9
+*/
+function gcaptcha_script() {
+  $lang_gcaptcha_options = array('nb_NO' => 'no', 'en_US' => 'en', 'en_GB' => 'en', 'es_ES' => 'es');
+  $lang = '';
+  if (isset($lang_gcaptcha_options[get_locale()])) {
+    $lang = '?hl='.$lang_gcaptcha_options[get_locale()];
+  }
+  echo '<script src="https://www.google.com/recaptcha/api.js' . $lang . '" async defer></script>' . "\r\n";
+}
 
 /**
  * Custom code to be loaded before headers
@@ -239,7 +282,7 @@ function clean_login_load_before_headers() {
 
 			// LOGIN
 			if ( isset( $_REQUEST['action'] ) && $_REQUEST['action'] == 'login' ) {
-				$url = clean_login_get_translated_option_page( 'cl_login_url','');
+				//$url = clean_login_get_translated_option_page( 'cl_login_url','');
 				
 				$user = wp_signon();
 				if ( is_wp_error( $user ) )
@@ -314,8 +357,10 @@ function clean_login_load_before_headers() {
 			// REGISTER a new user
 			} else if ( isset( $_REQUEST['action'] ) && $_REQUEST['action'] == 'register' ) {
 
-				// check if captcha is checked
-				$enable_captcha = get_option( 'cl_antispam' ) == 'on' ? true : false;
+        // check if captcha is checked
+        $enable_captcha = get_option( 'cl_antispam' ) == 'on' ? true : false;
+        // check if gcaptcha is checked
+				$enable_gcaptcha = get_option( 'cl_gcaptcha' ) == 'on' ? true : false;
 				// check if standby role is checked
 				$create_standby_role = get_option( 'cl_standby' ) == 'on' ? true : false;
 				// check if password complexity is checked
@@ -363,8 +408,14 @@ function clean_login_load_before_headers() {
 				$website = isset( $_POST['website'] ) ? sanitize_text_field( $_POST['website'] ) : '';
 				$captcha = isset( $_POST['captcha'] ) ? sanitize_text_field( $_POST['captcha'] ) : '';
 				if( !session_id() ) session_start();
-				$captcha_session = isset( $_SESSION['cleanlogin-captcha'] ) ? $_SESSION['cleanlogin-captcha'] : '';
-				if( session_id() ) session_destroy();
+				if (!empty ($_SESSION['cleanlogin-captcha'])) {
+					$captcha_session = $_SESSION['cleanlogin-captcha'];
+					// session_unregister is deprecated and removed as of PHP 5.4
+					unset($_SESSION['cleanlogin-captcha']);
+				}
+				else {
+					$captcha_session = '';
+				}
 				$role = isset( $_POST['role'] ) ? sanitize_text_field( $_POST['role'] ) : '';
 				$terms = isset( $_POST['termsconditions'] ) && $_POST['termsconditions'] == 'on' ? true : false;
 				
@@ -378,7 +429,8 @@ function clean_login_load_before_headers() {
 				else if ( $create_customrole && !in_array($role, $newuserroles))
 					$url = esc_url( add_query_arg( 'created', 'failed', $url ) );
 				// captcha enabled
-				else if( $enable_captcha && $captcha != $captcha_session )
+				else if( ($enable_captcha && $captcha != $captcha_session)
+                || ($enable_gcaptcha && !valid_gcaptcha()))
 					$url = esc_url( add_query_arg( 'created', 'wrongcaptcha', $url ) );
 				// honeypot detection
 				else if( $website != '.' )
@@ -391,8 +443,10 @@ function clean_login_load_before_headers() {
 				// check defaults
 				else if( $username == '' || username_exists( $username ) )
 					$url = esc_url( add_query_arg( 'created', 'wronguser', $url ) );
-				else if( $email == '' || email_exists( $email ) || !is_email( $email ) )
+				else if( $email == '' || !is_email( $email ) )
 					$url = esc_url( add_query_arg( 'created', 'wrongmail', $url ) );
+				else if ( email_exists( $email ) )
+					$url = esc_url( add_query_arg( 'created', 'emailexists', $url ) );
 				else if ( $pass1 == '' || $pass1 != $pass2)
 					$url = esc_url( add_query_arg( 'created', 'wrongpass', $url ) );
 				else {
@@ -461,6 +515,8 @@ function clean_login_load_before_headers() {
 								$url = esc_url( add_query_arg( 'sent', 'failed', $url ) );
 							remove_filter( 'wp_mail_content_type', 'clean_login_set_html_content_type' );
 						}
+
+						do_action( 'cleanlogin_after_successful_registration', $user_id );
 					}
 				}
 
@@ -470,7 +526,9 @@ function clean_login_load_before_headers() {
 					$url = esc_url(clean_login_get_translated_option_page('cl_url_redirect'));
 					wp_signon(array('user_login' => $username, 'user_password' => $pass1), false);
 				}					
-					
+				
+				do_action ('clean_login_register', $user);
+				
 				wp_safe_redirect( $url );
 
 			// When a user click the activation link goes here to activate his/her account
@@ -529,7 +587,8 @@ function clean_login_load_before_headers() {
 
 					$subject = "[$blog_title] " . __( 'Restore your password', 'clean-login' );
 					add_filter( 'wp_mail_content_type', 'clean_login_set_html_content_type' );
-					if( !wp_mail( $email, $subject , $message ) )
+					$headers[] = "Content-Type: text/html; charset=UTF-8";
+					if( !wp_mail( $email, $subject , $message, $headers ) )
 						$url = esc_url( add_query_arg( 'sent', 'failed', $url ) );
 					remove_filter( 'wp_mail_content_type', 'clean_login_set_html_content_type' );
 
@@ -824,12 +883,15 @@ function clean_login_options() {
     $hidden_field_value = 'hidden_field_to_update_others';
 
     if( isset($_POST[ $hidden_field_name ]) && $_POST[ $hidden_field_name ] == $hidden_field_value ) {
-	
+
 		$_POST  = filter_input_array(INPUT_POST, FILTER_SANITIZE_FULL_SPECIAL_CHARS );
 
         update_option( 'cl_adminbar', isset( $_POST['adminbar'] ) ? $_POST['adminbar'] : '' );
         update_option( 'cl_dashboard', isset( $_POST['dashboard'] ) ? $_POST['dashboard'] : '' );
         update_option( 'cl_antispam', isset( $_POST['antispam'] ) ? $_POST['antispam'] : '' );
+        update_option( 'cl_gcaptcha', isset( $_POST['gcaptcha'] ) ? $_POST['gcaptcha'] : '' );
+        update_option( 'cl_gcaptcha_sitekey', isset( $_POST['gcaptcha_sitekey'] ) ? $_POST['gcaptcha_sitekey'] : '' );
+        update_option( 'cl_gcaptcha_secretkey', isset( $_POST['gcaptcha_secretkey'] ) ? $_POST['gcaptcha_secretkey'] : '' );
         update_option( 'cl_standby', isset( $_POST['standby'] ) ? $_POST['standby'] : '' );
         update_option( 'cl_hideuser', isset( $_POST['hideuser'] ) ? $_POST['hideuser'] : '' );
         update_option( 'cl_passcomplex', isset( $_POST['passcomplex'] ) ? $_POST['passcomplex'] : '' );
@@ -858,6 +920,9 @@ function clean_login_options() {
     $adminbar = get_option( 'cl_adminbar' , 'on' );
     $dashboard = get_option( 'cl_dashboard' );
     $antispam = get_option( 'cl_antispam' );
+    $gcaptcha = get_option( 'cl_gcaptcha' );
+    $gcaptcha_sitekey = get_option( 'cl_gcaptcha_sitekey' );
+    $gcaptcha_secretkey = get_option( 'cl_gcaptcha_secretkey' );
     $standby = get_option( 'cl_standby' );
     $hideuser = get_option ( 'cl_hideuser' );
     $passcomplex = get_option ( 'cl_passcomplex' );
@@ -880,7 +945,7 @@ function clean_login_options() {
     $logoutredirect_url = get_option('cl_logout_redirect_url', false) ? esc_url(get_option('cl_logout_redirect_url')): home_url();
 
     ?>
-    	<form name="form1" method="post" action="">
+    	<form id="form1" name="form1" method="post" action="">
     	<table class="form-table">
 			<tbody>
 				<tr>
@@ -897,12 +962,27 @@ function clean_login_options() {
 					</td>
 				</tr>
 				<tr>
-					<th scope="row"><?php echo __( 'Antispam protection', 'clean-login' ); ?></th>
-					<td>
-						<label><input name="antispam" type="checkbox" id="antispam" <?php if( $antispam == 'on' ) echo 'checked="checked"'; ?>><?php echo __( 'Enable captcha?', 'clean-login' ); ?></label>
+					<th scope="row"><?php echo __( 'Antispam protection', 'clean-login' ); ?><p class="description">[Letters captcha]</p></th>
+          <td>
+						<label><input name="antispam" <?php if( $gcaptcha == 'on' ) echo 'disabled'; ?> type="checkbox" id="antispam" <?php if( $antispam == 'on' ) echo 'checked="checked"'; ?>><?php echo __( 'Enable captcha?', 'clean-login' ); ?></label>
 						<p class="description"><?php echo __( 'Honeypot antispam detection is enabled by default.', 'clean-login' ); ?></p>
 						<p class="description"><?php echo __( 'For captcha usage the PHP-GD library needs to be enabled in your server/hosting.', 'clean-login' ); ?></p>
 					</td>
+				</tr>
+				<tr>
+					<th scope="row"><?php echo __( 'Antispam protection', 'clean-login' ); ?><p class="description">[Google checkbox captcha]</p></th>
+          <td>
+            <label><input name="gcaptcha" <?php if( $antispam == 'on' ) echo 'disabled'; ?> type="checkbox" id="gcaptcha" <?php if( $gcaptcha == 'on' ) echo 'checked="checked"'; ?>><?php echo __( 'Enable Google reCaptcha?', 'clean-login' ); ?></label>
+            <div style="color:red; display:none;" id="gcaptcha_error"><?php echo __( 'Google reCaptcha site key and secret key must not be empty', 'clean-login' );?></div>
+            <div id="gcaptcha_sitekey-label" <?php if( $gcaptcha != 'on' ) echo 'style="display:none;"'; ?>>
+              <p class="description"><?php echo __( 'Google reCaptcha Site Key', 'clean-login' ); ?></p>
+              <label><input class="regular-text" value="<?php echo $gcaptcha_sitekey;?>" name="gcaptcha_sitekey" type="text" id="gcaptcha_sitekey"></label>
+            </div>
+            <div id="gcaptcha_secretkey-label" <?php if( $gcaptcha != 'on' ) echo 'style="display:none;"'; ?>>
+              <p class="description"><?php echo __( 'Google reCaptcha Secret Key', 'clean-login' ); ?></p>
+              <label><input class="regular-text" value="<?php echo $gcaptcha_secretkey;?>" name="gcaptcha_secretkey" type="text" id="gcaptcha_secretkey"></label>
+            </div>
+          </td>
 				</tr>
 				<tr>
 					<th scope="row"><?php echo __( 'User role', 'clean-login' ); ?></th>
@@ -1001,21 +1081,57 @@ function clean_login_options() {
     </div>
     <script>
     jQuery(document).ready(function( $ ) {
+      function scrollToTop() {
+        $('html, body').animate({
+            scrollTop: $("#form1").offset().top
+        }, 1000);
+      }
+      //Form validation
+      $("#form1").on("submit",function(evt) {
+        if ($('#gcaptcha').is(':checked') &&
+        ($('#gcaptcha_sitekey').val() == '' || $('#gcaptcha_secretkey').val() == '')) {
+          evt.preventDefault();
+          $('#gcaptcha_error').show();
+          scrollToTop();
+        }
+      });
+
+      //Antispam fields
+      $('#gcaptcha').click(function() {
+    		if ($(this).is(':checked')) {
+          $('#antispam').prop('checked', false);
+          $('#antispam').prop('disabled', true);
+          $('#gcaptcha_sitekey-label').show()
+          $('#gcaptcha_secretkey-label').show()
+    		} else {
+          $('#antispam').prop('disabled', false);
+          $('#gcaptcha_sitekey-label').hide()
+          $('#gcaptcha_secretkey-label').hide()
+        }
+    	});
+      $('#antispam').click(function() {
+    		if ($(this).is(':checked')) {
+          $('#gcaptcha').prop('checked', false);
+          $('#gcaptcha').prop('disabled', true);
+    		} else {
+          $('#gcaptcha').prop('disabled', false);
+        }
+    	});
 
     	var selected_roles = <?php echo json_encode($newuserroles); ?>;
     	$('select#newuserroles').find('option').each(function() {
-    		//alert(jQuery.inArray($(this).val(), selected_roles));
-		    if( jQuery.inArray($(this).val(), selected_roles) < 0 )
-		    	$(this).attr('selected', false);
-		    else
-		    	$(this).attr('selected', true);
-		});
+      		//alert(jQuery.inArray($(this).val(), selected_roles));
+  		    if( jQuery.inArray($(this).val(), selected_roles) < 0 )
+  		    	$(this).attr('selected', false);
+  		    else
+  		    	$(this).attr('selected', true);
+  		});
 
     	if ($('#chooserole').is(':checked')) {
-            $('#newuserroles').show();
-        } else {
-        	$('#newuserroles').hide();
-        }
+          $('#newuserroles').show();
+      } else {
+      	$('#newuserroles').hide();
+      }
 
     	$('#chooserole').click(function() {
 	       $('#newuserroles').toggle();

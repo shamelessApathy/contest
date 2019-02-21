@@ -3,14 +3,14 @@
  * Plugin Name: Social Media Follow Buttons Bar
  * Plugin URI: https://github.com/ArthurGareginyan/social-media-buttons-toolbar
  * Description: Easily add the smart bar with social media follow buttons (not share, only link to your profiles) to any place of your WordPress website.
- * Author: Arthur Gareginyan
- * Author URI: https://www.arthurgareginyan.com
- * Version: 4.26
+ * Author: Space X-Chimp
+ * Author URI: https://www.spacexchimp.com
+ * Version: 4.44
  * License: GPL3
  * Text Domain: social-media-buttons-toolbar
  * Domain Path: /languages/
  *
- * Copyright 2015-2017 Space X-Chimp Studio ( website : https://www.spacexchimp.com )
+ * Copyright 2015-2018 Space X-Chimp ( website : https://www.spacexchimp.com )
  *
  * This plugin is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,20 +25,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this plugin. If not, see <http://www.gnu.org/licenses/>.
  *
- *
- *               █████╗ ██████╗ ████████╗██╗  ██╗██╗   ██╗██████╗
- *              ██╔══██╗██╔══██╗╚══██╔══╝██║  ██║██║   ██║██╔══██╗
- *              ███████║██████╔╝   ██║   ███████║██║   ██║██████╔╝
- *              ██╔══██║██╔══██╗   ██║   ██╔══██║██║   ██║██╔══██╗
- *              ██║  ██║██║  ██║   ██║   ██║  ██║╚██████╔╝██║  ██║
- *              ╚═╝  ╚═╝╚═╝  ╚═╝   ╚═╝   ╚═╝  ╚═╝ ╚═════╝ ╚═╝  ╚═╝
- *
- *   ██████╗  █████╗ ██████╗ ███████╗ ██████╗ ██╗███╗   ██╗██╗   ██╗ █████╗ ███╗   ██╗
- *  ██╔════╝ ██╔══██╗██╔══██╗██╔════╝██╔════╝ ██║████╗  ██║╚██╗ ██╔╝██╔══██╗████╗  ██║
- *  ██║  ███╗███████║██████╔╝█████╗  ██║  ███╗██║██╔██╗ ██║ ╚████╔╝ ███████║██╔██╗ ██║
- *  ██║   ██║██╔══██║██╔══██╗██╔══╝  ██║   ██║██║██║╚██╗██║  ╚██╔╝  ██╔══██║██║╚██╗██║
- *  ╚██████╔╝██║  ██║██║  ██║███████╗╚██████╔╝██║██║ ╚████║   ██║   ██║  ██║██║ ╚████║
- *   ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝╚══════╝ ╚═════╝ ╚═╝╚═╝  ╚═══╝   ╚═╝   ╚═╝  ╚═╝╚═╝  ╚═══╝
+ * ███████╗██████╗  █████╗  ██████╗███████╗    ██╗  ██╗      ██████╗██╗  ██╗██╗███╗   ███╗██████╗
+ * ██╔════╝██╔══██╗██╔══██╗██╔════╝██╔════╝    ╚██╗██╔╝     ██╔════╝██║  ██║██║████╗ ████║██╔══██╗
+ * ███████╗██████╔╝███████║██║     █████╗       ╚███╔╝█████╗██║     ███████║██║██╔████╔██║██████╔╝
+ * ╚════██║██╔═══╝ ██╔══██║██║     ██╔══╝       ██╔██╗╚════╝██║     ██╔══██║██║██║╚██╔╝██║██╔═══╝
+ * ███████║██║     ██║  ██║╚██████╗███████╗    ██╔╝ ██╗     ╚██████╗██║  ██║██║██║ ╚═╝ ██║██║
+ * ╚══════╝╚═╝     ╚═╝  ╚═╝ ╚═════╝╚══════╝    ╚═╝  ╚═╝      ╚═════╝╚═╝  ╚═╝╚═╝╚═╝     ╚═╝╚═╝
  *
  */
 
@@ -63,6 +55,7 @@ function spacexchimp_p005_define_constants( $constant_name, $value ) {
     if ( !defined( $constant_name ) )
         define( $constant_name, $value );
 }
+spacexchimp_p005_define_constants( 'FILE', __FILE__ );
 spacexchimp_p005_define_constants( 'DIR', dirname( plugin_basename( __FILE__ ) ) );
 spacexchimp_p005_define_constants( 'BASE', plugin_basename( __FILE__ ) );
 spacexchimp_p005_define_constants( 'URL', plugin_dir_url( __FILE__ ) );
@@ -81,8 +74,8 @@ require_once( SPACEXCHIMP_P005_PATH . 'inc/php/core.php' );
 require_once( SPACEXCHIMP_P005_PATH . 'inc/php/upgrade.php' );
 require_once( SPACEXCHIMP_P005_PATH . 'inc/php/versioning.php' );
 require_once( SPACEXCHIMP_P005_PATH . 'inc/php/enqueue.php' );
+require_once( SPACEXCHIMP_P005_PATH . 'inc/php/items.php' );
 require_once( SPACEXCHIMP_P005_PATH . 'inc/php/functional.php' );
 require_once( SPACEXCHIMP_P005_PATH . 'inc/php/controls.php' );
 require_once( SPACEXCHIMP_P005_PATH . 'inc/php/page.php' );
 require_once( SPACEXCHIMP_P005_PATH . 'inc/php/messages.php' );
-require_once( SPACEXCHIMP_P005_PATH . 'inc/php/uninstall.php' );

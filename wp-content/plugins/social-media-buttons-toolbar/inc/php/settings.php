@@ -24,30 +24,71 @@ defined( 'ABSPATH' ) or die( "Restricted access!" );
                     <div class="postbox" id="buttons">
                         <h3 class="title"><?php _e( 'Buttons', $text ); ?></h3>
                         <div class="inside">
-                            <p class="note"><?php _e( 'Just fill in the required fields to make a buttons. The social networking buttons will lead directly to your profile pages. If you don\'t want to use any of the following buttons, you can not fill them and then they do not appear.', $text ); ?></p>
+                            <p class="note"><?php _e( 'Here you can select the buttons that you want to have in your social media follow buttons bar.', $text ); ?></p>
                             <table class="form-table">
-                                <?php require_once( SPACEXCHIMP_P005_PATH . 'inc/php/list.php' ); ?>
+                                <?php
+                                    $buttons_media = spacexchimp_p005_get_media_pairs_media();
+                                    spacexchimp_p005_control_checkbox( 'buttons-selected',
+                                                                       $buttons_media,
+                                                                       __( 'Social media buttons', $text ),
+                                                                       __( 'Mark the desired buttons to add it to your social media follow buttons bar.', $text )
+                                                                     );
+
+                                    $buttons_additional = spacexchimp_p005_get_media_pairs_additional();
+                                    spacexchimp_p005_control_checkbox( 'buttons-selected',
+                                                                       $buttons_additional,
+                                                                       __( 'Additional buttons', $text ),
+                                                                       __( 'Mark the desired buttons to add it to your social media follow buttons bar.', $text )
+                                                                     );
+                                ?>
                             </table>
                         </div>
                     </div>
 
-                    <div class="postbox" id="displayo-ptions">
+                    <div class="postbox" id="button-links">
+                        <h3 class="title"><?php _e( 'Button links', $text ); ?></h3>
+                        <div class="inside">
+                            <p class="note"><?php _e( 'Fill in the fields below to add links that will lead directly to your profile pages in social media that you selected in section above.', $text ); ?></p>
+                            <table class="form-table">
+                                <?php
+                                    $items_all = spacexchimp_p005_get_items_all();
+                                    foreach ( $items_all as $item ) {
+                                        foreach ( $item as $item_key => $item_value ) {
+                                            if ( $item_key == 'slug' ) $slug = $item_value;
+                                            if ( $item_key == 'label' ) $label = $item_value;
+                                            if ( $item_key == 'placeholder' ) $placeholder = $item_value;
+                                            if ( $item_key == 'help' ) $help = $item_value;
+                                            if ( $item_key == 'link' ) $link = $item_value;
+                                        }
+                                        spacexchimp_p005_control_link( $slug,
+                                                                       $label,
+                                                                       $placeholder,
+                                                                       $help,
+                                                                       $link
+                                                                     );
+                                    }
+                                ?>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="postbox" id="display">
                         <h3 class="title"><?php _e( 'Display options', $text ); ?></h3>
                         <div class="inside">
-                            <p class="note"><?php _e( 'There you can configure this plugin.', $text ); ?></p>
+                            <p class="note"><?php _e( 'Here you can configure the display options.', $text ); ?></p>
                             <table class="form-table">
                                 <?php
                                     spacexchimp_p005_control_switch( 'show_posts',
                                                                      __( 'Show on Posts', $text ),
-                                                                     __( 'Automatically display toolbar below content on Posts.', $text )
+                                                                     __( 'Automatically display the social media follow buttons below content on Posts.', $text )
                                                                    );
                                     spacexchimp_p005_control_switch( 'show_pages',
                                                                      __( 'Show on Pages', $text ),
-                                                                     __( 'Automatically display toolbar below content on Pages.', $text )
+                                                                     __( 'Automatically display the social media follow buttons below content on Pages.', $text )
                                                                    );
                                     spacexchimp_p005_control_switch( 'new_tab',
                                                                      __( 'Open in new tab', $text ),
-                                                                     __( 'Open link in a new tab/window.', $text )
+                                                                     __( 'Open links in a new tab/window.', $text )
                                                                    );
                                     spacexchimp_p005_control_switch( 'tooltips',
                                                                      __( 'Tooltips', $text ),
@@ -96,7 +137,7 @@ defined( 'ABSPATH' ) or die( "Restricted access!" );
                     <div class="postbox" id="support-addition">
                         <h3 class="title"><?php _e( 'Support', $text ); ?></h3>
                         <div class="inside">
-                            <p><?php _e( 'I\'m an independent developer, without a regular income, so every little contribution helps cover my costs and lets me spend more time building things for people like you to enjoy.', $text ); ?></p>
+                            <p><?php _e( 'Every little contribution helps to cover our costs and allows us to spend more time creating things for awesome people like you to enjoy.', $text ); ?></p>
                             <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=8A88KC7TFF6CS" target="_blank" class="btn btn-default button-labeled">
                                                         <span class="btn-label">
                                                             <img src="<?php echo SPACEXCHIMP_P005_URL . 'inc/img/paypal.svg'; ?>" alt="PayPal">

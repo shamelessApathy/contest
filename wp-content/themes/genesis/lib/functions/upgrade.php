@@ -7,8 +7,8 @@
  *
  * @package Genesis\Updates
  * @author  StudioPress
- * @license GPL-2.0+
- * @link    http://my.studiopress.com/themes/genesis/
+ * @license GPL-2.0-or-later
+ * @link    https://my.studiopress.com/themes/genesis/
  */
 
 /**
@@ -39,34 +39,14 @@ function genesis_first_version() {
  * @param string $operator Relationship between versions.
  * @return bool `true` if the relationship is the one specified by the operator, `false` otherwise.
  */
-function genesis_first_version_compare( $version, $operator  ) {
+function genesis_first_version_compare( $version, $operator ) {
 
 	return version_compare( genesis_first_version(), $version, $operator );
 
 }
 
 /**
- * Determine if a version string is considered a major release under Genesis rules.
- *
- * For Genesis, a release of something like 2.5.0 is a major release version, as is 2.6.0.
- * 2.5.1 or 2.6.2 is considered a minor release version.As such, we can just check if the final
- *
- * All values of `PARENT_THEME_VERSION` are given as 3 digits (5 characters), x.y.z. The major
- * release after 2.9.0 will be 3.0.0, and not 2.10.0 - Genesis does not follow semantic versioning.
- *
- * As such, we can simply check if the 4th and 5th characters until the end, are `.0`. This means
- * that a value of `2.6.0-dev` will NOT be counted as a major version.
- *
- * @since 2.6.0
- *
- * @return bool True if version has `.0` as 4th and 5th character onwards, false otherwise.
- */
-function genesis_is_major_version( $version ) {
-	return '.0' === substr( $version, 3 );
-}
-
-/**
- * Ping http://api.genesistheme.com/ asking if a new version of this theme is available.
+ * Ping https://api.genesistheme.com/ asking if a new version of this theme is available.
  *
  * If not, it returns false.
  *
@@ -85,15 +65,13 @@ function genesis_is_major_version( $version ) {
  */
 function genesis_update_check() {
 
-	// Use cache.
-	static $genesis_update = null;
-
-	global $wp_version;
-
 	// If updates are disabled.
 	if ( ! genesis_get_option( 'update' ) || ! current_theme_supports( 'genesis-auto-updates' ) ) {
 		return array();
 	}
+
+	// Use cache.
+	static $genesis_update = null;
 
 	// If cache is empty, pull transient.
 	if ( ! $genesis_update ) {
@@ -103,34 +81,33 @@ function genesis_update_check() {
 	// If transient has expired, do a fresh update check.
 	if ( ! $genesis_update ) {
 
-		$url     = 'http://api.genesistheme.com/update-themes/';
-		$options = apply_filters(
+		$update_config  = require GENESIS_CONFIG_DIR . '/update-check.php';
+
+		/**
+		 * Filter the request data sent to the update server.
+		 *
+		 * @since 1.1.0
+		 *
+		 * @param array The request data sent to the update server.
+		 */
+		$update_config['post_args'] = apply_filters(
 			'genesis_update_remote_post_options',
-			array(
-				'body' => array(
-					'genesis_version' => PARENT_THEME_VERSION,
-					'html5'           => genesis_html5(),
-					'php_version'     => phpversion(),
-					'uri'             => home_url(),
-					'stylesheet'      => get_stylesheet(),
-					'user-agent'      => "WordPress/$wp_version;",
-					'wp_version'      => $wp_version,
-				),
-			)
+			$update_config['post_args']
 		);
 
-		$response = wp_remote_post( $url, $options );
-		$response_body = wp_remote_retrieve_body( $response );
+		$update_check   = new Genesis_Update_Check( $update_config );
 
-		// If an error occurred, return FALSE, store for 1 hour.
-		if ( 'error' === $response_body || is_wp_error( $response_body ) || ! is_serialized( $response_body ) ) {
-			$genesis_update = array( 'new_version' => PARENT_THEME_VERSION );
+		// If an error occurred, return empty array, store for 1 hour.
+		if ( ! $update_check->get_update() ) {
+			$genesis_update = array(
+				'new_version' => PARENT_THEME_VERSION,
+			);
 			set_transient( 'genesis-update', $genesis_update, HOUR_IN_SECONDS );
 			return array();
 		}
 
 		// Else, unserialize.
-		$genesis_update = maybe_unserialize( $response_body );
+		$genesis_update = $update_check->get_update();
 
 		// And store in transient for 24 hours.
 		set_transient( 'genesis-update', $genesis_update, DAY_IN_SECONDS );
@@ -147,17 +124,45 @@ function genesis_update_check() {
 }
 
 /**
- * Upgrade the database to version 2504.
+ * Upgrade the database to latest version.
  *
- * @since 2.5.2
+ * @since 2.6.0
  */
-function genesis_upgrade_2504() {
+function genesis_upgrade_db_latest() {
 
 	// Update Settings.
 	genesis_update_settings( array(
-		'theme_version' => '2.5.3',
-		'db_version'    => '2504',
+		'theme_version' => PARENT_THEME_VERSION,
+		'db_version'    => PARENT_DB_VERSION,
 		'upgrade'       => 1,
+	) );
+
+}
+
+/**
+ * Upgrade the database to version 2700.
+ *
+ * @since 2.7.0
+ */
+function genesis_upgrade_2700() {
+	delete_option( 'genesis-scribe-nag-disabled' );
+}
+
+/**
+ * Upgrade the database to version 2603.
+ *
+ * @since 2.6.1
+ */
+function genesis_upgrade_2603() {
+
+	genesis_unslash_post_meta_scripts();
+
+	genesis_update_settings( array(
+		'header_scripts' => stripslashes( genesis_get_option( 'header_scripts' ) ),
+		'footer_scripts' => stripslashes( genesis_get_option( 'footer_scripts' ) ),
+		'theme_version'  => '2.6.1',
+		'db_version'     => '2603',
+		'upgrade'        => 1,
 	) );
 
 }
@@ -253,9 +258,9 @@ function genesis_upgrade_2201() {
 
 	// Update Settings.
 	genesis_update_settings( array(
-		'theme_version'   => '2.2.0-beta2',
-		'db_version'      => '2201',
-		'upgrade'         => 1,
+		'theme_version' => '2.2.0-beta2',
+		'db_version'    => '2201',
+		'upgrade'       => 1,
 	) );
 
 	// Update SEO Settings.
@@ -291,9 +296,9 @@ function genesis_upgrade_2003() {
 
 	// Update Settings.
 	genesis_update_settings( array(
-		'superfish'     => genesis_get_option( 'nav_superfish', null, 0 ) || genesis_get_option( 'subnav_superfish', null, 0 ) ? 1 : 0,
-		'db_version'    => '2003',
-		'upgrade'       => 1,
+		'superfish'  => genesis_get_option( 'nav_superfish', null, 0 ) || genesis_get_option( 'subnav_superfish', null, 0 ) ? 1 : 0,
+		'db_version' => '2003',
+		'upgrade'    => 1,
 	) );
 
 }
@@ -338,8 +343,8 @@ function genesis_upgrade_1901() {
 
 	// Update Settings.
 	genesis_update_settings( array(
-		'db_version'    => '1901',
-		'upgrade'       => 1,
+		'db_version' => '1901',
+		'upgrade'    => 1,
 	) );
 
 }
@@ -352,25 +357,12 @@ function genesis_upgrade_1901() {
 function genesis_upgrade_1800() {
 
 	// Convert term meta for new title/description options.
-	$terms     = get_terms( get_taxonomies(), array( 'hide_empty' => false ) );
-	$term_meta = get_option( 'genesis-term-meta' );
-
-	foreach ( (array) $terms as $term ) {
-		if ( isset( $term_meta[$term->term_id]['display_title'] ) && $term_meta[$term->term_id]['display_title'] ) {
-			$term_meta[$term->term_id]['headline'] = $term->name;
-		}
-
-		if ( isset( $term_meta[$term->term_id]['display_description'] ) && $term_meta[$term->term_id]['display_description'] ) {
-			$term_meta[$term->term_id]['intro_text'] = $term->description;
-		}
-	}
-
-	update_option( 'genesis-term-meta', $term_meta );
+	genesis_convert_term_meta();
 
 	// Update Settings.
 	genesis_update_settings( array(
-		'db_version'    => '1800',
-		'upgrade'       => 1,
+		'db_version' => '1800',
+		'upgrade'    => 1,
 	) );
 
 }
@@ -394,9 +386,64 @@ function genesis_upgrade_1700() {
 
 	// Update Settings.
 	genesis_update_settings( array(
-		'db_version'    => '1700',
-		'upgrade'       => 1,
+		'db_version' => '1700',
+		'upgrade'    => 1,
 	) );
+
+}
+
+/**
+ * Convert term meta for new title/description options.
+ *
+ * Called in `genesis_upgrade_1800()`.
+ *
+ * @since 2.6.0
+ */
+function genesis_convert_term_meta() {
+	// Convert term meta for new title/description options.
+	$terms     = get_terms( get_taxonomies(), array(
+		'hide_empty' => false,
+	) );
+	$term_meta = get_option( 'genesis-term-meta' );
+
+	foreach ( (array) $terms as $term ) {
+		if ( isset( $term_meta[ $term->term_id ]['display_title'] ) && $term_meta[ $term->term_id ]['display_title'] ) {
+			$term_meta[ $term->term_id ]['headline'] = $term->name;
+		}
+
+		if ( isset( $term_meta[ $term->term_id ]['display_description'] ) && $term_meta[ $term->term_id ]['display_description'] ) {
+			$term_meta[ $term->term_id ]['intro_text'] = $term->description;
+		}
+	}
+
+	update_option( 'genesis-term-meta', $term_meta );
+}
+
+/**
+ * Strip slashes from header and body scripts saved as post meta.
+ *
+ * Called in `genesis_upgrade_2603()`.
+ *
+ * @since 2.6.1
+ */
+function genesis_unslash_post_meta_scripts() {
+
+	global $wpdb;
+
+	$header_scripts_posts = $wpdb->get_results( "SELECT post_id FROM $wpdb->postmeta WHERE meta_key = '_genesis_scripts'" );
+	$body_scripts_posts   = $wpdb->get_results( "SELECT post_id FROM $wpdb->postmeta WHERE meta_key = '_genesis_scripts_body'" );
+
+	foreach ( $header_scripts_posts as $post ) {
+		if ( ! empty( $post->post_id ) ) {
+			update_post_meta( $post->post_id, '_genesis_scripts', get_post_meta( $post->post_id, '_genesis_scripts', 1 ) );
+		}
+	}
+
+	foreach ( $body_scripts_posts as $post ) {
+		if ( ! empty( $post->post_id ) ) {
+			update_post_meta( $post->post_id, '_genesis_scripts_body', get_post_meta( $post->post_id, '_genesis_scripts_body', 1 ) );
+		}
+	}
 
 }
 
@@ -424,9 +471,9 @@ function genesis_upgrade() {
 	global $wp_db_version;
 
 	// If the WP db hasn't been upgraded, make them upgrade first.
-	if ( get_option('db_version') != $wp_db_version ) {
+	if ( get_option( 'db_version' ) != $wp_db_version ) {
 		wp_redirect( admin_url( 'upgrade.php?_wp_http_referer=' . urlencode( wp_unslash( $_SERVER['REQUEST_URI'] ) ) ) );
- 		exit;
+		exit;
 	}
 
 	// UPDATE TO VERSION 1.0.1.
@@ -526,12 +573,12 @@ function genesis_upgrade() {
 	if ( version_compare( genesis_get_option( 'theme_version', null, false ), '1.6', '<' ) ) {
 		// Vestige nav settings, for backward compatibility.
 		if ( 'nav-menu' !== genesis_get_option( 'nav_type' ) ) {
-			_genesis_vestige( array( 'nav_type', 'nav_superfish', 'nav_home', 'nav_pages_sort', 'nav_categories_sort', 'nav_depth', 'nav_exclude', 'nav_include', ) );
+			_genesis_vestige( array( 'nav_type', 'nav_superfish', 'nav_home', 'nav_pages_sort', 'nav_categories_sort', 'nav_depth', 'nav_exclude', 'nav_include' ) );
 		}
 
 		// Vestige subnav settings, for backward compatibility.
 		if ( 'nav-menu' !== genesis_get_option( 'subnav_type' ) ) {
-			_genesis_vestige( array( 'subnav_type', 'subnav_superfish', 'subnav_home', 'subnav_pages_sort', 'subnav_categories_sort', 'subnav_depth', 'subnav_exclude', 'subnav_include', ) );
+			_genesis_vestige( array( 'subnav_type', 'subnav_superfish', 'subnav_home', 'subnav_pages_sort', 'subnav_categories_sort', 'subnav_depth', 'subnav_exclude', 'subnav_include' ) );
 		}
 
 		$theme_settings = get_option( GENESIS_SETTINGS_FIELD );
@@ -599,11 +646,30 @@ function genesis_upgrade() {
 		genesis_upgrade_2501();
 	}
 
-	// UPDATE DB TO VERSION 2504.
-	if ( genesis_get_option( 'db_version', null, false ) < '2504' ) {
-		genesis_upgrade_2504();
+	// UPDATE DB TO VERSION 2603.
+	if ( genesis_get_option( 'db_version', null, false ) < '2603' ) {
+		genesis_upgrade_2603();
 	}
 
+	// UPDATE DB TO VERSION 2700.
+	if ( genesis_get_option( 'db_version', null, false ) < '2700' ) {
+		genesis_upgrade_2700();
+	}
+
+	// UPDATE DB TO LATEST VERSION.
+	if ( genesis_get_option( 'db_version', null, false ) < PARENT_DB_VERSION ) {
+		genesis_upgrade_db_latest();
+	}
+
+	// Clear the cache to prevent a redirect loop in some object caching environments
+	wp_cache_flush();
+	wp_cache_delete( 'alloptions', 'options' );
+
+	/**
+	 * Fires after upgrade processes have completed.
+	 *
+	 * @since 1.0.1
+	 */
 	do_action( 'genesis_upgrade' );
 
 }
@@ -621,7 +687,9 @@ add_action( 'wpmu_upgrade_site', 'genesis_network_upgrade_site' );
 function genesis_network_upgrade_site( $blog_id ) {
 
 	switch_to_blog( $blog_id );
-	$upgrade_url = add_query_arg( array( 'action' => 'genesis-silent-upgrade' ), admin_url( 'admin-ajax.php' ) );
+	$upgrade_url = add_query_arg( array(
+		'action' => 'genesis-silent-upgrade',
+	), admin_url( 'admin-ajax.php' ) );
 	restore_current_blog();
 
 	wp_remote_get( esc_url_raw( $upgrade_url ) );
@@ -646,7 +714,7 @@ function genesis_silent_upgrade() {
 
 add_action( 'genesis_upgrade', 'genesis_upgrade_redirect' );
 /**
- * Redirect the user back to the theme settings page, refreshing the data and notifying the user that they have
+ * Redirect the user back to the "What's New" page, refreshing the data and notifying the user that they have
  * successfully updated.
  *
  * @since 1.6.0
@@ -659,13 +727,7 @@ function genesis_upgrade_redirect() {
 		return;
 	}
 
-	if ( genesis_is_major_version( PARENT_THEME_VERSION ) ) {
-		genesis_admin_redirect( 'genesis-upgraded' ); // What's New page.
-	} else {
-		genesis_admin_redirect( 'genesis', array( // Theme Settings page.
-			'upgraded' => 'true',
-		) );
-	}
+	genesis_admin_redirect( 'genesis-upgraded' ); // What's New page.
 
 }
 
@@ -687,7 +749,8 @@ function genesis_upgraded_notice() {
 
 	if ( isset( $_REQUEST['upgraded'] ) && 'true' === $_REQUEST['upgraded'] ) {
 		echo '<div id="message" class="updated highlight"><p><strong>';
-		printf( __( 'Congratulations, you are now rocking Genesis %s! <a href="%s">See what\'s new in %s</a>.', 'genesis' ), genesis_get_option( 'theme_version' ), menu_page_url( 'genesis-upgraded', 0 ), PARENT_THEME_BRANCH );
+		/* translators: 1: Genesis version, 2: URL for What's New admin page. */
+		printf( __( 'Congratulations, you are now rocking Genesis %1$s! <a href="%2$s">See what\'s new in %3$s</a>.', 'genesis' ), genesis_get_option( 'theme_version' ), menu_page_url( 'genesis-upgraded', 0 ), PARENT_THEME_BRANCH );
 		echo '</strong></p></div>';
 	}
 
@@ -705,8 +768,8 @@ add_filter( 'update_theme_complete_actions', 'genesis_update_action_links', 10, 
  *
  * @param array  $actions Existing array of action links.
  * @param string $theme   Theme name.
- * @return string Removes all existing action links in favour of a single link, if Genesis is
- *                the theme being updated. Otherwise, return existing action links.
+ * @return array Removes all existing action links in favour of a single link, if Genesis is
+ *               the theme being updated. Otherwise, return existing action links.
  */
 function genesis_update_action_links( array $actions, $theme ) {
 
@@ -714,7 +777,13 @@ function genesis_update_action_links( array $actions, $theme ) {
 		return $actions;
 	}
 
-	return sprintf( '<a href="%s">%s</a>', menu_page_url( 'genesis', 0 ), __( 'Click here to complete the upgrade', 'genesis' ) );
+	return array(
+		sprintf(
+			'<a href="%s">%s</a>',
+			menu_page_url( 'genesis', 0 ),
+			esc_html__( 'Click here to complete the upgrade', 'genesis' )
+		),
+	);
 
 }
 
@@ -741,7 +810,8 @@ function genesis_update_nag() {
 
 	echo '<div id="update-nag">';
 	printf(
-		__( 'Genesis %s is available. <a href="%s" %s>Check out what\'s new</a> or <a href="%s" %s>update now.</a>', 'genesis' ),
+		/* translators: 1: Genesis version, 2: URL for change log, 3: class attribute for anchor, 4: URL for updating Genesis, 5: class attribute for anchor. */
+		__( 'Genesis %1$s is available. <a href="%2$s" %3$s>Check out what\'s new</a> or <a href="%4$s" %5$s>update now.</a>', 'genesis' ),
 		esc_html( $genesis_update['new_version'] ),
 		esc_url( $genesis_update['changelog_url'] ),
 		'class="thickbox thickbox-preview"',
@@ -788,12 +858,15 @@ function genesis_update_email() {
 	}
 
 	// Let's send an email.
-	$subject  = sprintf( __( 'Genesis %s is available for %s', 'genesis' ), esc_html( $update_check['new_version'] ), home_url() );
+	/* translators: 1: Genesis version, 2: URL for current website. */
+	$subject = sprintf( __( 'Genesis %1$s is available for %2$s', 'genesis' ), esc_html( $update_check['new_version'] ), home_url() );
+
+	/* translators: %s: Genesis version. */
 	$message  = sprintf( __( 'Genesis %s is now available. We have provided 1-click updates for this theme, so please log into your dashboard and update at your earliest convenience.', 'genesis' ), esc_html( $update_check['new_version'] ) );
 	$message .= "\n\n" . wp_login_url();
 
 	// Update the option so we don't send emails on every pageload.
-	update_option( 'genesis-update-email', $update_check['new_version'], TRUE );
+	update_option( 'genesis-update-email', $update_check['new_version'], true );
 
 	// Send that puppy!
 	wp_mail( sanitize_email( $email ), $subject, $message );
@@ -852,7 +925,7 @@ function genesis_update_push( $value ) {
 		return $value;
 	}
 
-	if ( isset ( $value->response['genesis'] ) ) {
+	if ( isset( $value->response['genesis'] ) ) {
 		unset( $value->response['genesis'] );
 	}
 
@@ -913,9 +986,9 @@ function _genesis_vestige( array $keys = array(), $setting = GENESIS_SETTINGS_FI
 	// Cycle through $keys, creating new vestige array.
 	$new_vestige = array();
 	foreach ( (array) $keys as $key ) {
-		if ( isset( $options[$key] ) ) {
-			$new_vestige[$key] = $options[$key];
-			unset( $options[$key] );
+		if ( isset( $options[ $key ] ) ) {
+			$new_vestige[ $key ] = $options[ $key ];
+			unset( $options[ $key ] );
 		}
 	}
 

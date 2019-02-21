@@ -7,8 +7,8 @@
  *
  * @package Genesis\SEO
  * @author  StudioPress
- * @license GPL-2.0+
- * @link    http://my.studiopress.com/themes/genesis/
+ * @license GPL-2.0-or-later
+ * @link    https://my.studiopress.com/themes/genesis/
  */
 
 /**
@@ -29,12 +29,12 @@
  */
 function genesis_disable_seo() {
 
-	remove_filter( 'wp_title', 'genesis_default_title', 10, 3 );
+	remove_filter( 'wp_title', 'genesis_default_title', 10 );
 	remove_action( 'get_header', 'genesis_doc_head_control' );
-	remove_action( 'genesis_meta','genesis_seo_meta_description' );
-	remove_action( 'genesis_meta','genesis_seo_meta_keywords' );
-	remove_action( 'genesis_meta','genesis_robots_meta' );
-	remove_action( 'wp_head','genesis_canonical', 5 );
+	remove_action( 'genesis_meta', 'genesis_seo_meta_description' );
+	remove_action( 'genesis_meta', 'genesis_seo_meta_keywords' );
+	remove_action( 'genesis_meta', 'genesis_robots_meta' );
+	remove_action( 'wp_head', 'genesis_canonical', 5 );
 	remove_action( 'wp_head', 'genesis_meta_name' );
 	remove_action( 'wp_head', 'genesis_meta_url' );
 	remove_action( 'wp_head', 'genesis_paged_rel' );
@@ -42,7 +42,7 @@ function genesis_disable_seo() {
 	add_filter( 'genesis_attr_head', 'genesis_attributes_empty_class' );
 
 	remove_action( 'admin_menu', 'genesis_add_inpost_seo_box' );
-	remove_action( 'save_post', 'genesis_inpost_seo_save', 1, 2 );
+	remove_action( 'save_post', 'genesis_inpost_seo_save', 1 );
 
 	remove_action( 'admin_init', 'genesis_add_taxonomy_seo_options' );
 
@@ -74,6 +74,17 @@ function genesis_seo_disabled() {
 
 }
 
+/**
+ * Detect whether Genesis SEO is active.
+ *
+ * @since 2.6.0
+ *
+ * @return bool `true` if Genesis SEO is active, `false` otherwise.
+ */
+function genesis_seo_active() {
+	return ! genesis_seo_disabled();
+}
+
 add_action( 'after_setup_theme', 'genesis_seo_compatibility_check' );
 /**
  * Check for the existence of popular SEO plugins and disable the Genesis SEO features if one or more of the plugins
@@ -93,38 +104,10 @@ function genesis_seo_compatibility_check() {
 
 	// Disable Genesis <title> generation if SEO Title Tag is active.
 	if ( function_exists( 'seo_title_tag' ) ) {
-		remove_filter( 'wp_title', 'genesis_default_title', 10, 3 );
+		remove_filter( 'wp_title', 'genesis_default_title', 10 );
 		remove_action( 'genesis_title', 'wp_title' );
 		add_action( 'genesis_title', 'seo_title_tag' );
 	}
-
-}
-
-add_action( 'admin_init', 'genesis_disable_scribe_nag' );
-/**
- * Potentially disable Scribe admin notice.
- *
- * Detect a query flag, and disables the Scribe nag, then redirect the user back to the SEO settings page.
- *
- * @since 1.4.0
- *
- * @return null Return early if not on the SEO Settings page, or `dismiss-scribe` querystring argument
- *              not present and set to `'true'`.
- */
-function genesis_disable_scribe_nag() {
-
-	if ( ! genesis_is_menu_page( 'seo-settings' ) ) {
-		return;
-	}
-
-	if ( ! isset( $_REQUEST['dismiss-scribe'] ) || 'true' !== $_REQUEST['dismiss-scribe'] ) {
-		return;
-	}
-
-	update_option( 'genesis-scribe-nag-disabled', 1 );
-
-	genesis_admin_redirect( 'seo-settings' );
-	exit;
 
 }
 
@@ -147,7 +130,7 @@ function genesis_detect_seo_plugins() {
 			array(
 
 				// Classes to detect.
-				'classes' => array(
+				'classes'   => array(
 					'All_in_One_SEO_Pack',
 					'All_in_One_SEO_Pack_p',
 					'HeadSpace_Plugin',
@@ -160,7 +143,7 @@ function genesis_detect_seo_plugins() {
 				'functions' => array(),
 
 				// Constants to detect.
-				'constants' => array( 'WPSEO_VERSION', ),
+				'constants' => array( 'WPSEO_VERSION', 'SEOPRESS_VERSION' ),
 			)
 		)
 	);

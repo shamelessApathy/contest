@@ -7,8 +7,8 @@
  *
  * @package Genesis\General
  * @author  StudioPress
- * @license GPL-2.0+
- * @link    http://my.studiopress.com/themes/genesis/
+ * @license GPL-2.0-or-later
+ * @link    https://my.studiopress.com/themes/genesis/
  */
 
 /**
@@ -20,7 +20,9 @@
  */
 function genesis_enable_author_box( $args = array() ) {
 
-	$args = wp_parse_args( $args, array( 'type' => 'single' ) );
+	$args = wp_parse_args( $args, array(
+		'type' => 'single',
+	) );
 
 	if ( 'single' === $args['type'] ) {
 		add_filter( 'get_the_author_genesis_author_box_single', '__return_true' );
@@ -49,7 +51,7 @@ function genesis_admin_redirect( $page, array $query_args = array() ) {
 
 	foreach ( (array) $query_args as $key => $value ) {
 		if ( empty( $key ) && empty( $value ) ) {
-			unset( $query_args[$key] );
+			unset( $query_args[ $key ] );
 		}
 	}
 
@@ -99,7 +101,7 @@ function genesis_get_theme_support_arg( $feature, $arg, $default = '' ) {
 
 	$support = get_theme_support( $feature );
 
-	if ( ! $arg &&  $support ) {
+	if ( ! $arg && $support ) {
 		return true;
 	}
 
@@ -428,7 +430,7 @@ function genesis_sitemap( $heading = 'h2' ) {
  * @return string $heading Sitemap content.
  */
 function genesis_get_sitemap( $heading = 'h2' ) {
-	
+
 	/**
 	 * Filter the sitemap before the default sitemap is built.
 	 *
@@ -481,11 +483,19 @@ function genesis_get_sitemap( $heading = 'h2' ) {
  */
 function genesis_plugin_install_link( $plugin_slug = '', $text = '' ) {
 
+	$page = 'plugin-install.php';
+	$args = array(
+		'tab'       => 'plugin-information',
+		'TB_iframe' => true,
+		'width'     => 600,
+		'height'    => 550,
+		'plugin'    => $plugin_slug,
+	);
+
+	$url = add_query_arg( $args, admin_url( $page ) );
+
 	if ( is_main_site() ) {
-		$url = network_admin_url( 'plugin-install.php?tab=plugin-information&plugin=' . $plugin_slug . '&TB_iframe=true&width=600&height=550' );
-	}
-	else {
-		$url = admin_url( 'plugin-install.php?tab=plugin-information&plugin=' . $plugin_slug . '&TB_iframe=true&width=600&height=550' );
+		$url = add_query_arg( $args, network_admin_url( $page ) );
 	}
 
 	return sprintf( '<a href="%s" class="thickbox">%s</a>', esc_url( $url ), esc_html( $text ) );
@@ -530,17 +540,14 @@ function genesis_canonical_url() {
 	$page  = (int) get_query_var( 'page' );
 
 	if ( is_front_page() ) {
-
 		if ( $paged ) {
 			$canonical = get_pagenum_link( $paged );
 		} else {
 			$canonical = trailingslashit( home_url() );
 		}
-
 	}
 
 	if ( is_singular() ) {
-
 		$numpages = substr_count( $wp_query->post->post_content, '<!--nextpage-->' ) + 1;
 
 		if ( ! $id = $wp_query->get_queried_object_id() ) {
@@ -556,11 +563,9 @@ function genesis_canonical_url() {
 		} else {
 			$canonical = get_permalink( $id );
 		}
-
 	}
 
 	if ( is_category() || is_tag() || is_tax() ) {
-
 		if ( ! $id = $wp_query->get_queried_object_id() ) {
 			return null;
 		}
@@ -568,17 +573,14 @@ function genesis_canonical_url() {
 		$taxonomy = $wp_query->queried_object->taxonomy;
 
 		$canonical = $paged ? get_pagenum_link( $paged ) : get_term_link( (int) $id, $taxonomy );
-
 	}
 
 	if ( is_author() ) {
-
 		if ( ! $id = $wp_query->get_queried_object_id() ) {
 			return null;
 		}
 
 		$canonical = $paged ? get_pagenum_link( $paged ) : get_author_posts_url( $id );
-
 	}
 
 	if ( is_search() ) {
@@ -586,5 +588,23 @@ function genesis_canonical_url() {
 	}
 
 	return apply_filters( 'genesis_canonical_url', $canonical );
+
+}
+
+/**
+ * Checks if this web page is an AMP URL.
+ *
+ * @since 2.7.0
+ *
+ * @return bool `true` if AMP URL; else `false`.
+ */
+function genesis_is_amp() {
+
+	// If the AMP plugin is not installed, bail out and return `false`.
+	if ( ! function_exists( 'is_amp_endpoint' ) ) {
+		return false;
+	}
+
+	return is_amp_endpoint();
 
 }

@@ -4,7 +4,7 @@
  * @package     Social Media Follow Buttons Bar
  * @author      Arthur Gareginyan
  * @link        https://www.spacexchimp.com
- * @copyright   Copyright (c) 2016-2017 Space X-Chimp Studio. All Rights Reserved.
+ * @copyright   Copyright (c) 2016-2018 Space X-Chimp. All Rights Reserved.
  */
 
 
@@ -51,11 +51,17 @@ jQuery(document).ready(function($) {
         input.change();
     });
 
+    // Show/hide fields
+    $('#buttons .control-checkbox input').change(function() {
+        var this_class = $(this).parent('.control-checkbox').attr('id') + '-url';
+        $('#button-links .' + this_class).toggle();
+    });
+
     // Live preview
     $('.new_tab').on('change', function() {
         var val = $(this).val();
         var position = $(this).next().children().hasClass('btn-success');
-        $('#preview .smbt-social-icons a').each(function( index ) {
+        $('#preview .sxc-follow-buttons a').each(function( index ) {
             if (position === true) {
                 $(this).attr('target','_blank');
             } else {
@@ -66,7 +72,7 @@ jQuery(document).ready(function($) {
     $('.tooltips').on('change', function() {
         var val = $(this).val();
         var position = $(this).next().children().hasClass('btn-success');
-        $('#preview .smbt-social-icons a').each(function( index ) {
+        $('#preview .sxc-follow-buttons a').each(function( index ) {
             var text = '';
             if (position === true) {
                 text = $(this).attr('title');
@@ -85,7 +91,7 @@ jQuery(document).ready(function($) {
         var margin = $('.margin-right input').val() / 2 || '5';
         icon_size = 'width:' + icon_size + 'px !important; height:' + icon_size + 'px !important;';
         margin = 'margin:' + margin + 'px !important;';
-        $('#preview .smbt-social-icons img').attr('style',icon_size + margin);
+        $('#preview .sxc-follow-buttons img').attr('style',icon_size + margin);
     }
     $('.icon-size input').change(function() {
         LiveInlineStyles();
@@ -96,7 +102,7 @@ jQuery(document).ready(function($) {
     $('.alignment').change(function() {
         var alignment = $('input[type=radio]:checked', '.alignment').val() || 'center';
         alignment = 'text-align:' + alignment + ' !important;';
-        $('#preview .smbt-social-icons').attr('style',alignment);
+        $('#preview .sxc-follow-buttons').attr('style',alignment);
     });
 
 });
